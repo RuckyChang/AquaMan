@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaMan", "AquaMan.csproj", "{2389C6A3-67C8-41C9-A419-6734F4427289}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaMan.Domain", "..\AquaMan.Domain\AquaMan.Domain.csproj", "{08424DC4-1F90-4AD4-AB02-DCE2C56A147D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaMan.DomainApi", "..\AquaMan.DomainApi\AquaMan.DomainApi.csproj", "{AE67775B-C5E2-462A-AFB8-DB32C29366D4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaMan.Persistence.Adapter", "..\AquaMan.Persistence.Adapter\AquaMan.Persistence.Adapter.csproj", "{F8D3D09D-4E25-4AF6-B3E2-F2A1AEF1D796}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaMan.WebsocketAdapter", "..\AquaMan.WebsocketAdapter\AquaMan.WebsocketAdapter.csproj", "{7FC7FE3C-E060-4B93-922F-78938B353BF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AquaMan.Domain.Test", "..\AquaMan.Domain.Test\AquaMan.Domain.Test.csproj", "{3C2DFB47-8077-4C07-B59A-3FE29C77ED08}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2389C6A3-67C8-41C9-A419-6734F4427289}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2389C6A3-67C8-41C9-A419-6734F4427289}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2389C6A3-67C8-41C9-A419-6734F4427289}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2389C6A3-67C8-41C9-A419-6734F4427289}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08424DC4-1F90-4AD4-AB02-DCE2C56A147D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08424DC4-1F90-4AD4-AB02-DCE2C56A147D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08424DC4-1F90-4AD4-AB02-DCE2C56A147D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08424DC4-1F90-4AD4-AB02-DCE2C56A147D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE67775B-C5E2-462A-AFB8-DB32C29366D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE67775B-C5E2-462A-AFB8-DB32C29366D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE67775B-C5E2-462A-AFB8-DB32C29366D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE67775B-C5E2-462A-AFB8-DB32C29366D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8D3D09D-4E25-4AF6-B3E2-F2A1AEF1D796}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8D3D09D-4E25-4AF6-B3E2-F2A1AEF1D796}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8D3D09D-4E25-4AF6-B3E2-F2A1AEF1D796}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8D3D09D-4E25-4AF6-B3E2-F2A1AEF1D796}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FC7FE3C-E060-4B93-922F-78938B353BF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FC7FE3C-E060-4B93-922F-78938B353BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FC7FE3C-E060-4B93-922F-78938B353BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FC7FE3C-E060-4B93-922F-78938B353BF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C2DFB47-8077-4C07-B59A-3FE29C77ED08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C2DFB47-8077-4C07-B59A-3FE29C77ED08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C2DFB47-8077-4C07-B59A-3FE29C77ED08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C2DFB47-8077-4C07-B59A-3FE29C77ED08}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D51D87A8-868B-49C0-B472-018ACF502FFA}
+	EndGlobalSection
+EndGlobal
