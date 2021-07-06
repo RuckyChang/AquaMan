@@ -6,13 +6,31 @@ namespace AquaMan.Domain
 {
     public class Account
     {
-        public string ID { get; set; }
-        public string Name { get; set; }
-        public string Password { get; set; }
-        public string Agent { get; set; }
-        public string Token { get; set; }//TODO: maybe use TTL for this?
-        public string LastLoginTime { get; set; }
-        public Wallet Wallet { get; set; }
+        public string ID { get; }
+        public string Name { get; }
+        public string Password { get; }
+        public string Agent { get; }
+        public string Token { get; private set; } = "";
+        public DateTime? LastLoginTime { get; private set; }
+        public Wallet Wallet { get; }
+        public Account(
+            string id,
+            string name,
+            string password,
+            string agent,
+            string token,
+            DateTime? lastLoginTime,
+            Wallet wallet
+            )
+        {
+            ID = id;
+            Name = name;
+            Password = password;
+            Agent = agent;
+            Token = token;
+            LastLoginTime = lastLoginTime;
+            Wallet = wallet;
+        }
 
         public void Login(string name, string password)
         {
@@ -20,6 +38,9 @@ namespace AquaMan.Domain
             {
                 throw new LoginFailedException(name, password);
             }
+
+            Token = new Guid().ToString();
+            LastLoginTime = DateTime.Now;
         }
         public void Deposit(Cost cost)
         {
