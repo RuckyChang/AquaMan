@@ -32,5 +32,11 @@ namespace AquaMan.Domain.Entity
                 precise: 100
             ));
         }
+
+        public Enemy(string id, List<RewardMoney> rewardMoney)
+        {
+            ID = id;
+            RewardMoney.AddRange(rewardMoney);
+        }
     }
 }

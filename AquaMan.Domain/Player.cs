@@ -4,46 +4,94 @@ using System;
 
 namespace AquaMan.Domain
 {
-    public enum State
+    public enum PlayerState
     {
-        NORMAL,
-        FEVER,
+        NotInGame,
+        InGame,
     }
 
     public class Player
     {
         public string AccountId { get;  }
-        public State State { get;  }
-        public string CurrentGameId { get;  }
 
-        public Player(string accountId, State state, string gameId)
+        public PlayerState State
+        {
+            get
+            {
+                return CurrentGameId == string.Empty ? PlayerState.NotInGame : PlayerState.InGame;
+            }
+        }
+        public string CurrentGameId { get; private set; }
+
+        public Player(string accountId, string gameId)
         {
             AccountId = accountId;
-            State = state;
             CurrentGameId = gameId;
         }
 
-
-        public (bool, DropCoinEvent) OnHitEvent(HitEvent e)
+        public void OnJoinGame(string gameIdToJoin)
         {
+            if (CurrentGameId != string.Empty)
+            {
+                throw new PlayerAlreadyInGameException(CurrentGameId, gameIdToJoin);
+            }
+
+            CurrentGameId = gameIdToJoin;
+        }
+
+        public void OnQuitGame(string gameIdToQuit)
+        {
+            if(CurrentGameId != gameIdToQuit)
+            {
+                throw new PlayerNotInTheGameException(CurrentGameId, gameIdToQuit);
+            }
+
+            CurrentGameId = string.Empty;
+        }
+
+        public (bool, DropCoinEvent) OnHitEvent(HitEvent e, int killPossibility)
+        {
+
             // TODO: extract this to another module.            
 
             var rand = new Random();
 
-            var randResult = rand.Next(100);
+            var randResult = rand.Next(100) + 1;
 
-            if(randResult >= 50)
+            if(randResult <= killPossibility)
             {
                 return (true, new DropCoinEvent(
                     new Cost(
                         currency:  e.Bullet.Price.Currency,
                         amount: e.Enemy.RewardMoney[0].Amount,
-                        precise: e.Bullet.Price.Precise
+                        precise: e.Enemy.RewardMoney[0].Precise
                         )
                     ));
             }
 
             return (false, null);
+        }
+    }
+
+    public class PlayerAlreadyInGameException: Exception
+    {
+        public string CurrentGameId { get; }
+        public string GameIdToJoin { get; }
+        public PlayerAlreadyInGameException(string currentGameId, string gameToJoin)
+        {
+            CurrentGameId = currentGameId;
+            GameIdToJoin = gameToJoin;
+        }
+    }
+
+    public class PlayerNotInTheGameException: Exception
+    {
+        public string CurrentGameId { get; }
+        public string GameIdToQuit { get; }
+        public PlayerNotInTheGameException(string currentGameId, string gameIdToQuit)
+        {
+            CurrentGameId = currentGameId;
+            GameIdToQuit = gameIdToQuit;
         }
     }
 }

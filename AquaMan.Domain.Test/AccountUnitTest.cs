@@ -200,7 +200,6 @@ namespace AquaMan.Domain.Test
 
             Player player = new Player(
                 accountId: account.ID,
-                state: State.NORMAL,
                 gameId: "fish_1"
                 );
 
@@ -239,7 +238,6 @@ namespace AquaMan.Domain.Test
 
             Player player = new Player(
                 accountId: account.ID,
-                state: State.NORMAL,
                 gameId: "fish_1"
             );
 
@@ -286,7 +284,6 @@ namespace AquaMan.Domain.Test
 
             Player player = new Player(
                 accountId: account.ID,
-                state: State.NORMAL,
                 gameId: "fish_1"
             );
 
