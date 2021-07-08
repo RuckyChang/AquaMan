@@ -15,7 +15,7 @@ namespace AquaMan.Domain.Test
                 id: new Guid().ToString(),
                 name: "foo",
                 password: "bar",
-                agent: "123456",
+                agentId: "123456",
                 token: "",
                 lastLoginTime: null,
                 wallet: new Wallet(currency: Currency.USD, amount: 0, precise: 1)
@@ -35,7 +35,7 @@ namespace AquaMan.Domain.Test
                 id: new Guid().ToString(),
                 name: "foor",
                 password: "bar",
-                agent: "123456",
+                agentId: "123456",
                 token: "",
                 lastLoginTime: null,
                 wallet: new Wallet(currency: Currency.USD, amount: 0, precise: 1)
@@ -64,7 +64,7 @@ namespace AquaMan.Domain.Test
                 id: new Guid().ToString(),
                 name: "foor",
                 password: "bar",
-                agent: "123456",
+                agentId: "123456",
                 token: "",
                 lastLoginTime: null,
                 wallet: new Wallet(currency: Currency.USD, amount: 0, precise: 1)
@@ -83,7 +83,7 @@ namespace AquaMan.Domain.Test
                 id: new Guid().ToString(),
                 name: "foor",
                 password: "bar",
-                agent: "123456",
+                agentId: "123456",
                 token: "",
                 lastLoginTime: null,
                 wallet: new Wallet(currency: Currency.TWD, amount: 0, precise: 1)
@@ -112,7 +112,7 @@ namespace AquaMan.Domain.Test
                 id: new Guid().ToString(),
                 name: "foor",
                 password: "bar",
-                agent: "123456",
+                agentId: "123456",
                 token: "",
                 lastLoginTime: null,
                 wallet: new Wallet(currency: Currency.TWD, amount: amountInWallet, precise: 1)
@@ -132,7 +132,7 @@ namespace AquaMan.Domain.Test
                 id: new Guid().ToString(),
                 name: "foor",
                 password: "bar",
-                agent: "123456",
+                agentId: "123456",
                 token: "",
                 lastLoginTime: null,
                 wallet: new Wallet(currency: Currency.TWD, amount: amountInWallet, precise: 1)
@@ -164,7 +164,7 @@ namespace AquaMan.Domain.Test
                id: new Guid().ToString(),
                name: "foor",
                password: "bar",
-               agent: "123456",
+               agentId: "123456",
                token: "",
                lastLoginTime: null,
                wallet: new Wallet(currency: walletCurrency, amount: 1, precise: 1)
@@ -192,7 +192,7 @@ namespace AquaMan.Domain.Test
                id: new Guid().ToString(),
                name: "foor",
                password: "bar",
-               agent: "123456",
+               agentId: "123456",
                token: "",
                lastLoginTime: null,
                wallet: new Wallet(currency: Currency.TWD, amount: amountInWallet, precise: 1)
@@ -230,7 +230,7 @@ namespace AquaMan.Domain.Test
                id: new Guid().ToString(),
                name: "foor",
                password: "bar",
-               agent: "123456",
+               agentId: "123456",
                token: "",
                lastLoginTime: null,
                wallet: new Wallet(currency: Currency.TWD, amount: amountInWallet, precise: 1)
@@ -276,7 +276,7 @@ namespace AquaMan.Domain.Test
               id: new Guid().ToString(),
               name: "foor",
               password: "bar",
-              agent: "123456",
+              agentId: "123456",
               token: "",
               lastLoginTime: null,
               wallet: new Wallet(currency: Currency.USD, amount: amountInWallet, precise: 1)
@@ -323,7 +323,7 @@ namespace AquaMan.Domain.Test
               id: new Guid().ToString(),
               name: "foor",
               password: "bar",
-              agent: "123456",
+              agentId: "123456",
               token: "",
               lastLoginTime: null,
               wallet: new Wallet(currency: Currency.USD, amount: amountInWallet, precise: 1)
@@ -348,7 +348,7 @@ namespace AquaMan.Domain.Test
               id: new Guid().ToString(),
               name: "foor",
               password: "bar",
-              agent: "123456",
+              agentId: "123456",
               token: "",
               lastLoginTime: null,
               wallet: new Wallet(currency: Currency.USD, amount: 100, precise: 1)

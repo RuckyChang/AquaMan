@@ -31,6 +31,7 @@ namespace AquaMan.Domain.Test
             var order = new Order(
                 id: new Guid().ToString(),
                 gameId: new Guid().ToString(),
+                agentId: new Guid().ToString(),
                 accountId: new Guid().ToString(),
                 amount: 1,
                 orderType: OrderType.DEPOSIT,
@@ -61,6 +62,7 @@ namespace AquaMan.Domain.Test
             var order = new Order(
                 id: new Guid().ToString(),
                 gameId: new Guid().ToString(),
+                agentId: new Guid().ToString(),
                 accountId: new Guid().ToString(),
                 amount: 1,
                 orderType: OrderType.DEPOSIT,

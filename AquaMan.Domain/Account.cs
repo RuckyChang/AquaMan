@@ -9,7 +9,7 @@ namespace AquaMan.Domain
         public string ID { get; }
         public string Name { get; }
         public string Password { get; }
-        public string Agent { get; }
+        public string AgentId { get; }
         public string Token { get; private set; } = "";
         public DateTime? LastLoginTime { get; private set; }
         public Wallet Wallet { get; }
@@ -17,7 +17,7 @@ namespace AquaMan.Domain
             string id,
             string name,
             string password,
-            string agent,
+            string agentId,
             string token,
             DateTime? lastLoginTime,
             Wallet wallet
@@ -26,7 +26,7 @@ namespace AquaMan.Domain
             ID = id;
             Name = name;
             Password = password;
-            Agent = agent;
+            AgentId = agentId;
             Token = token;
             LastLoginTime = lastLoginTime;
             Wallet = wallet;

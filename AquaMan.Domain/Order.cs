@@ -31,6 +31,7 @@ namespace AquaMan.Domain
     public class Order
     {
         public string ID { get; }
+        public string AgentId { get; }
         public string GameId { get; }
         public string AccountID { get; }
         public uint Amount { get; }
@@ -41,6 +42,7 @@ namespace AquaMan.Domain
 
         public Order(
             string id,
+            string agentId,
             string gameId,
             string accountId,
             uint amount,
@@ -50,6 +52,7 @@ namespace AquaMan.Domain
             )
         {
             ID = id;
+            AgentId = agentId;
             GameId = gameId;
             AccountID = accountId;
             Amount = amount;
