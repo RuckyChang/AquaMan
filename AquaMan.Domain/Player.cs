@@ -12,6 +12,7 @@ namespace AquaMan.Domain
 
     public class Player
     {
+        public string ID { get; }
         public string AccountId { get;  }
 
         public PlayerState State
@@ -23,8 +24,9 @@ namespace AquaMan.Domain
         }
         public string CurrentGameId { get; private set; }
 
-        public Player(string accountId, string gameId)
+        public Player(string id, string accountId, string gameId)
         {
+            ID = id;
             AccountId = accountId;
             CurrentGameId = gameId;
         }
