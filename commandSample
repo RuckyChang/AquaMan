@@ -1,0 +1,19 @@
+//login
+{
+	"Command":0,
+	"Payload":{
+		"Name": "ricky",
+		"Password": "123456",
+		"AgentId": "1",
+		"Moeney": {
+			"Currency": 0,
+			"Amount": 100,
+			"Precise": 100
+		}
+	}
+}
+
+logout
+{
+	
+}

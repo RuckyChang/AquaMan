@@ -1,7 +1,7 @@
 ﻿using AquaMan.Domain.Entity;
 
 
-namespace AquaMan.WebsocketAdapter.Command
+namespace AquaMan.WebsocketAdapter.Entity
 {
     public class Money
     {

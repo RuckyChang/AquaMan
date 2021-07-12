@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaMan.WebsocketAdapter", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaMan.Domain.Test", "..\AquaMan.Domain.Test\AquaMan.Domain.Test.csproj", "{3C2DFB47-8077-4C07-B59A-3FE29C77ED08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AquaMan.DomainApi.Test", "..\AquaMan.DomainApi.Test\AquaMan.DomainApi.Test.csproj", "{6D58F048-47D1-48D2-9B16-0D7E8110E35E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaMan.DomainApi.Test", "..\AquaMan.DomainApi.Test\AquaMan.DomainApi.Test.csproj", "{6D58F048-47D1-48D2-9B16-0D7E8110E35E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AquaMan.WebsocketAdapter.Test", "..\AquaMan.WebsocketAdapter.Test\AquaMan.WebsocketAdapter.Test.csproj", "{BD55CBF7-8747-4D49-BFD1-AD642DC392E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{6D58F048-47D1-48D2-9B16-0D7E8110E35E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D58F048-47D1-48D2-9B16-0D7E8110E35E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D58F048-47D1-48D2-9B16-0D7E8110E35E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD55CBF7-8747-4D49-BFD1-AD642DC392E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD55CBF7-8747-4D49-BFD1-AD642DC392E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD55CBF7-8747-4D49-BFD1-AD642DC392E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD55CBF7-8747-4D49-BFD1-AD642DC392E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
