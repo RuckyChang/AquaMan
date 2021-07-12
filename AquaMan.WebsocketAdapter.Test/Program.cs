@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AquaMan.DomainApi;
+using System;
 using System.Threading.Tasks;
 
 namespace AquaMan.WebsocketAdapter.Test
@@ -7,7 +8,10 @@ namespace AquaMan.WebsocketAdapter.Test
     {
         static void Main(string[] args)
         {
-            var lobby = new Lobby();
+            var accountRepo = new InMemoryAccountRepository();
+            var accountService = new AccountService(accountRepo);
+
+            var lobby = new Lobby(accountService);
             lobby.Start();
 
             var tcs = new TaskCompletionSource();

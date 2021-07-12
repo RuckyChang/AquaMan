@@ -13,7 +13,8 @@ namespace AquaMan.DomainApi
         public Account CreateAccount(
             string name,
             string password,
-            string agentId
+            string agentId,
+            Wallet wallet
             )
         {
             if(name == null || name == string.Empty)
@@ -33,12 +34,6 @@ namespace AquaMan.DomainApi
 
             var id = new Guid().ToString();
 
-            var wallet = new Wallet(
-                currency: Domain.Entity.Currency.CNY,
-                amount: 0,
-                precise: 100
-                );
-
             var account = new Account(
                 id: id,
                 name: name,
@@ -57,6 +52,11 @@ namespace AquaMan.DomainApi
             }
 
             return account;
+        }
+
+        public Account OfAgentIdAndName(string agentId, string name)
+        {
+            return _repo.OfAgentIdAndName(agentId, name);
         }
     }
 }

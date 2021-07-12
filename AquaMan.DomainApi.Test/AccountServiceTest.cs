@@ -15,7 +15,12 @@ namespace AquaMan.DomainApi.Test
             var account = accountService.CreateAccount(
                 name: "test_1",
                 password: "123456",
-                agentId: "agent_1"
+                agentId: "agent_1",
+                wallet: new Wallet(
+                        currency: Domain.Entity.Currency.CNY,
+                        amount: 0,
+                        precise: 100
+                        )
                 );
 
             Assert.Equal("test_1", account.Name);
@@ -43,7 +48,12 @@ namespace AquaMan.DomainApi.Test
                 accountService.CreateAccount(
                     name: name,
                     password: password,
-                    agentId: agentId
+                    agentId: agentId,
+                    wallet: new Wallet(
+                        currency: Domain.Entity.Currency.CNY,
+                        amount: 0,
+                        precise: 100
+                        )
                     );
             }catch(ArgumentInvalidException e)
             {
@@ -88,6 +98,20 @@ namespace AquaMan.DomainApi.Test
             }
 
             return found;
+        }
+
+        public Account OfAgentIdAndName(string agentId, string name)
+        {
+            List<Account> found = new List<Account>();
+            foreach (var account in _storage.Values)
+            {
+                if (account.Name == name && account.AgentId == agentId)
+                {
+                    found.Add(account);
+                }
+            }
+
+            return found[0];
         }
 
         public bool Save(Account account)

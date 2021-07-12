@@ -15,7 +15,7 @@ namespace AquaMan.WebsocketAdapter
             public string Name { get; set; }
             public string Password { get; set; }
             public string AgentId { get; set; }
-            public Money Moeny { get; set; }
+            public Money Money { get; set; }
         }
 
         public class Logout

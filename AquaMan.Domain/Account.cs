@@ -32,7 +32,7 @@ namespace AquaMan.Domain
             Wallet = wallet;
         }
 
-        public void Login(string name, string password)
+        public string Login(string name, string password)
         {
             if(name != Name || Password != password)
             {
@@ -41,6 +41,8 @@ namespace AquaMan.Domain
 
             Token = new Guid().ToString();
             LastLoginTime = DateTime.Now;
+
+            return Token;
         }
         public void Deposit(Cost cost)
         {

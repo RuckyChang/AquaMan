@@ -9,5 +9,7 @@ namespace AquaMan.DomainApi
         public Account OfId(string id);
         public List<Account> OfAgentId(string agent);
         public List<Account> OfName(string name);
+
+        public Account OfAgentIdAndName(string agentId, string name);
     }
 }

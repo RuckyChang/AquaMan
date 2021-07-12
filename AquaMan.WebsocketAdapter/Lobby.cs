@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using AquaMan.Domain;
+using AquaMan.DomainApi;
 using Fleck;
 using Newtonsoft.Json;
 
@@ -9,9 +11,12 @@ namespace AquaMan.WebsocketAdapter
     {
         WebSocketServer _server;
         ConcurrentDictionary<Guid, IWebSocketConnection> sockets = new ConcurrentDictionary<Guid, IWebSocketConnection>();
-        public Lobby(int port=8081)
+        private AccountService _accountService;
+
+        public Lobby(AccountService accountService, int port = 8081)
         {
             _server = new WebSocketServer("ws://0.0.0.0:"+port);
+            _accountService = accountService;
         }
 
         public void Start()
@@ -33,20 +38,49 @@ namespace AquaMan.WebsocketAdapter
                     
                     Console.WriteLine(message);
                     // parse message
-                    ParseMessage(message);
+                    ParseMessage(socket, message);
                 };
             });
         }
 
-        public void ParseMessage(string message)
+        public void ParseMessage(IWebSocketConnection socket, string message)
         {
             var command = JsonConvert.DeserializeObject<Command>(message);
             switch ((CommandType)command.CommandType)
             {
                 case CommandType.Login:
                     Command<Login> loginCommand = JsonConvert.DeserializeObject<Command<Login>>(message);
-                    Console.WriteLine(loginCommand.Payload.Name);
-                    Console.WriteLine(loginCommand.Payload.Password);
+
+                    var payload = loginCommand.Payload;
+
+                    var account = _accountService.OfAgentIdAndName(
+                        payload.AgentId,
+                        payload.Name
+                    );
+
+                    if(account == null)
+                    {
+                        account = _accountService.CreateAccount(
+                            name: payload.Name,
+                            password: payload.Password,
+                            agentId: payload.AgentId,
+                            new Wallet(
+                                currency: payload.Money.Currency,
+                                amount: payload.Money.Amount,
+                                precise: payload.Money.Precise
+                                )
+                            );
+                    }
+
+                    var token = account.Login(payload.Name, payload.Password);
+                    var loginedEvent = new Event<LogedIn>()
+                    {
+                        Payload = new LogedIn()
+                        {
+                            Token = token
+                        }
+                    };
+                    socket.Send(JsonConvert.SerializeObject(loginedEvent));
                     break;
                 case CommandType.Logout:
 
