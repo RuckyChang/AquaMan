@@ -8,7 +8,7 @@ namespace AquaMan.Domain.GameEvent
         public DateTime OccurredAt { get; }
         public Event()
         {
-            Guid obj = new Guid();
+            Guid obj = Guid.NewGuid();
             ID = obj.ToString();
 
             OccurredAt = DateTime.Now;

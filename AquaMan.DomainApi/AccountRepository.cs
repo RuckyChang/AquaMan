@@ -11,5 +11,7 @@ namespace AquaMan.DomainApi
         public List<Account> OfName(string name);
 
         public Account OfAgentIdAndName(string agentId, string name);
+
+        public Account OfToken(string token);
     }
 }

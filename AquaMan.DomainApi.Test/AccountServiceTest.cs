@@ -114,6 +114,20 @@ namespace AquaMan.DomainApi.Test
             return found[0];
         }
 
+        public Account OfToken(string token)
+        {
+            List<Account> found = new List<Account>();
+            foreach (var account in _storage.Values)
+            {
+                if (account.Token == token)
+                {
+                    found.Add(account);
+                }
+            }
+
+            return found[0];
+        }
+
         public bool Save(Account account)
         {
             if (_storage.ContainsKey(account.ID)){

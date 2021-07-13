@@ -49,48 +49,69 @@ namespace AquaMan.WebsocketAdapter
             switch ((CommandType)command.CommandType)
             {
                 case CommandType.Login:
-                    Command<Login> loginCommand = JsonConvert.DeserializeObject<Command<Login>>(message);
+                   
 
-                    var payload = loginCommand.Payload;
-
-                    var account = _accountService.OfAgentIdAndName(
-                        payload.AgentId,
-                        payload.Name
-                    );
-
-                    if(account == null)
-                    {
-                        account = _accountService.CreateAccount(
-                            name: payload.Name,
-                            password: payload.Password,
-                            agentId: payload.AgentId,
-                            new Wallet(
-                                currency: payload.Money.Currency,
-                                amount: payload.Money.Amount,
-                                precise: payload.Money.Precise
-                                )
-                            );
-                    }
-
-                    var token = account.Login(payload.Name, payload.Password);
-                    var loginedEvent = new Event<LogedIn>()
-                    {
-                        Payload = new LogedIn()
-                        {
-                            Token = token
-                        }
-                    };
-                    socket.Send(JsonConvert.SerializeObject(loginedEvent));
                     break;
                 case CommandType.Logout:
+                    Command<Logout> logoutCommand = JsonConvert.DeserializeObject<Command<Logout>>(message);
 
+                    var account = _accountService.OfToken(logoutCommand.Payload.Token);
+                    account.Logout();
+
+
+                    socket.Send(JsonConvert.SerializeObject(new Event<LoggedOut>()
+                    {
+                        Payload = new LoggedOut()
+                    }));
                     break;
             }
         }
 
-        public void CommandDispatcher()
+        private void Login(IWebSocketConnection socket, string message)
         {
+            Command<Login> loginCommand = JsonConvert.DeserializeObject<Command<Login>>(message);
 
+            var payload = loginCommand.Payload;
+
+            var account = _accountService.OfAgentIdAndName(
+                payload.AgentId,
+                payload.Name
+            );
+
+            if (account == null)
+            {
+                account = _accountService.CreateAccount(
+                    name: payload.Name,
+                    password: payload.Password,
+                    agentId: payload.AgentId,
+                    new Wallet(
+                        currency: payload.Money.Currency,
+                        amount: payload.Money.Amount,
+                        precise: payload.Money.Precise
+                        )
+                    );
+            }
+
+            if (account.Token == null || account.Token != string.Empty)
+            {
+                socket.Send(JsonConvert.SerializeObject(new Event<LoggedIn>()
+                {
+                    Payload = new LoggedIn()
+                    {
+                        Token = account.Token
+                    }
+                }));
+                return;
+            }
+
+            var token = account.Login(payload.Name, payload.Password);
+            socket.Send(JsonConvert.SerializeObject(new Event<LoggedIn>()
+            {
+                Payload = new LoggedIn()
+                {
+                    Token = token
+                }
+            }));
         }
     }
 }

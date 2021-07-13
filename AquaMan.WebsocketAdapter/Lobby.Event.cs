@@ -4,12 +4,18 @@
     {
         public enum EventType
         {
-            LogedIn
+            LogedIn,
+            Log
         }
 
-        public class LogedIn
+        public class LoggedIn
         {
             public string Token { get; set; }
+        }
+
+        public class LoggedOut
+        {
+            
         }
     }
 }

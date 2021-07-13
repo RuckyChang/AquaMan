@@ -25,7 +25,7 @@ namespace AquaMan.Domain.Entity
 
         public Enemy()
         {
-            ID = new Guid().ToString();
+            ID = Guid.NewGuid().ToString();
             RewardMoney.Add(new RewardMoney(
                 currency: Currency.USD,
                 amount: 100,

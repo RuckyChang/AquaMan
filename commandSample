@@ -1,11 +1,11 @@
 //login
 {
-	"Command":0,
+	"CommandType":0,
 	"Payload":{
 		"Name": "ricky",
 		"Password": "123456",
 		"AgentId": "1",
-		"Moeney": {
+		"Money": {
 			"Currency": 0,
 			"Amount": 100,
 			"Precise": 100
@@ -13,7 +13,11 @@
 	}
 }
 
-logout
+
+//logout
 {
-	
+	"CommandType": 1,
+	"Payload":{
+		"Token":"89b8ffb3-a5f9-49eb-87ee-a2beccc607aa"
+	}
 }

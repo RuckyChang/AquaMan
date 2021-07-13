@@ -39,7 +39,7 @@ namespace AquaMan.Domain
                 throw new LoginFailedException(name, password);
             }
 
-            Token = new Guid().ToString();
+            Token = Guid.NewGuid().ToString();
             LastLoginTime = DateTime.Now;
 
             return Token;

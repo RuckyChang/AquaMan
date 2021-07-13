@@ -58,5 +58,10 @@ namespace AquaMan.DomainApi
         {
             return _repo.OfAgentIdAndName(agentId, name);
         }
+
+        public Account OfToken(string token)
+        {
+            return _repo.OfToken(token);
+        }
     }
 }
