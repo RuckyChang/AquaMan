@@ -4,12 +4,17 @@
     {
         public enum EventType
         {
-            LogedIn,
-            Log
+            Error = -1,
+            LoggedIn,
+            LoggedOut
         }
 
         public class EventPayload
         {
+            public class Error
+            {
+                public string ErrorCode { get; set; }
+            }
             public class LoggedIn
             {
                 public string Token { get; set; }

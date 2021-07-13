@@ -46,24 +46,31 @@ namespace AquaMan.WebsocketAdapter
         public void ParseMessage(IWebSocketConnection socket, string message)
         {
             var command = JsonConvert.DeserializeObject<Command>(message);
-            switch ((CommandType)command.CommandType)
+            try
             {
-                case CommandType.Login:
-                    Login(socket, message);
-                    break;
-                case CommandType.Logout:
-                    Command<CommandPayload.Logout> logoutCommand = JsonConvert.DeserializeObject<Command<CommandPayload.Logout>>(message);
-
-                    var account = _accountService.OfToken(logoutCommand.Payload.Token);
-                    account.Logout();
-
-                    _accountService.Save(account);
-
-                    socket.Send(JsonConvert.SerializeObject(new Event<EventPayload.LoggedOut>()
+                switch ((CommandType)command.CommandType)
+                {
+                    case CommandType.Login:
+                        Login(socket, message);
+                        break;
+                    case CommandType.Logout:
+                        Logout(socket, message);
+                        break;
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.Message);
+                socket.Send(JsonConvert.SerializeObject(
+                    new Event<Lobby.EventPayload.Error>()
                     {
-                        Payload = new EventPayload.LoggedOut()
-                    }));
-                    break;
+                        EventType = -1,
+                        Payload= new EventPayload.Error()
+                        {
+                            ErrorCode = "-1"
+                        }
+                    }
+                    ));
             }
         }
 
@@ -113,6 +120,22 @@ namespace AquaMan.WebsocketAdapter
                 {
                     Token = token
                 }
+            }));
+        }
+
+        private void Logout(IWebSocketConnection socket, string message)
+        {
+            Command<CommandPayload.Logout> logoutCommand = JsonConvert.DeserializeObject<Command<CommandPayload.Logout>>(message);
+
+            var account = _accountService.OfToken(logoutCommand.Payload.Token);
+            account.Logout();
+
+            _accountService.Save(account);
+
+            socket.Send(JsonConvert.SerializeObject(new Event<EventPayload.LoggedOut>()
+            {
+                EventType = (int)EventType.LoggedOut,
+                Payload = new EventPayload.LoggedOut()
             }));
         }
     }
