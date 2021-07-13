@@ -199,9 +199,10 @@ namespace AquaMan.Domain.Test
            );
 
             Player player = new Player(
+                id: Guid.NewGuid().ToString(),
                 accountId: account.ID,
                 gameId: "fish_1"
-                );
+                ) ;
 
             var shootEvent = new ShootEvent(
                 shootBy: new ShootBy(
@@ -237,6 +238,7 @@ namespace AquaMan.Domain.Test
             );
 
             Player player = new Player(
+                id: Guid.NewGuid().ToString(),
                 accountId: account.ID,
                 gameId: "fish_1"
             );
@@ -283,6 +285,7 @@ namespace AquaMan.Domain.Test
            );
 
             Player player = new Player(
+                id: new Guid().ToString(),
                 accountId: account.ID,
                 gameId: "fish_1"
             );

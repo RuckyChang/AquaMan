@@ -49,19 +49,19 @@ namespace AquaMan.WebsocketAdapter
             switch ((CommandType)command.CommandType)
             {
                 case CommandType.Login:
-                   
-
+                    Login(socket, message);
                     break;
                 case CommandType.Logout:
-                    Command<Logout> logoutCommand = JsonConvert.DeserializeObject<Command<Logout>>(message);
+                    Command<CommandPayload.Logout> logoutCommand = JsonConvert.DeserializeObject<Command<CommandPayload.Logout>>(message);
 
                     var account = _accountService.OfToken(logoutCommand.Payload.Token);
                     account.Logout();
 
+                    _accountService.Save(account);
 
-                    socket.Send(JsonConvert.SerializeObject(new Event<LoggedOut>()
+                    socket.Send(JsonConvert.SerializeObject(new Event<EventPayload.LoggedOut>()
                     {
-                        Payload = new LoggedOut()
+                        Payload = new EventPayload.LoggedOut()
                     }));
                     break;
             }
@@ -69,7 +69,7 @@ namespace AquaMan.WebsocketAdapter
 
         private void Login(IWebSocketConnection socket, string message)
         {
-            Command<Login> loginCommand = JsonConvert.DeserializeObject<Command<Login>>(message);
+            Command<CommandPayload.Login> loginCommand = JsonConvert.DeserializeObject<Command<CommandPayload.Login>>(message);
 
             var payload = loginCommand.Payload;
 
@@ -92,11 +92,11 @@ namespace AquaMan.WebsocketAdapter
                     );
             }
 
-            if (account.Token == null || account.Token != string.Empty)
+            if (account.Token != null && account.Token != string.Empty)
             {
-                socket.Send(JsonConvert.SerializeObject(new Event<LoggedIn>()
+                socket.Send(JsonConvert.SerializeObject(new Event<EventPayload.LoggedIn>()
                 {
-                    Payload = new LoggedIn()
+                    Payload = new EventPayload.LoggedIn()
                     {
                         Token = account.Token
                     }
@@ -105,9 +105,11 @@ namespace AquaMan.WebsocketAdapter
             }
 
             var token = account.Login(payload.Name, payload.Password);
-            socket.Send(JsonConvert.SerializeObject(new Event<LoggedIn>()
+            _accountService.Save(account);
+
+            socket.Send(JsonConvert.SerializeObject(new Event<EventPayload.LoggedIn>()
             {
-                Payload = new LoggedIn()
+                Payload = new EventPayload.LoggedIn()
                 {
                     Token = token
                 }

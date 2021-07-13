@@ -44,6 +44,13 @@ namespace AquaMan.Domain
 
             return Token;
         }
+
+        public void Logout()
+        {
+            Token = null;
+        }
+
+
         public void Deposit(Cost cost)
         {
             if (!Wallet.IsSameCurrency(cost))

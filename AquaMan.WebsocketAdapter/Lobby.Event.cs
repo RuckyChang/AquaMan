@@ -8,14 +8,17 @@
             Log
         }
 
-        public class LoggedIn
+        public class EventPayload
         {
-            public string Token { get; set; }
-        }
+            public class LoggedIn
+            {
+                public string Token { get; set; }
+            }
 
-        public class LoggedOut
-        {
+            public class LoggedOut
+            {
             
+            }
         }
     }
 }

@@ -63,5 +63,10 @@ namespace AquaMan.DomainApi
         {
             return _repo.OfToken(token);
         }
+
+        public void Save(Account account)
+        {
+            _repo.Save(account);
+        }
     }
 }

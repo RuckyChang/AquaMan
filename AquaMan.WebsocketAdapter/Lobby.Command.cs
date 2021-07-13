@@ -9,18 +9,20 @@ namespace AquaMan.WebsocketAdapter
             Login,
             Logout
         }
-
-        public class Login
+        public class CommandPayload
         {
-            public string Name { get; set; }
-            public string Password { get; set; }
-            public string AgentId { get; set; }
-            public Money Money { get; set; }
-        }
+            public class Login
+            {
+                public string Name { get; set; }
+                public string Password { get; set; }
+                public string AgentId { get; set; }
+                public Money Money { get; set; }
+            }
 
-        public class Logout
-        {
-            public string Token { get; set; }
+            public class Logout
+            {
+                public string Token { get; set; }
+            }
         }
     }
 }

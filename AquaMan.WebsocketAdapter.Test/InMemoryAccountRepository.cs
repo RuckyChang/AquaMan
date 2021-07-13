@@ -52,7 +52,7 @@ namespace AquaMan.WebsocketAdapter.Test
                 }
             }
 
-            if(found.Count == 0)
+            if (found.Count == 0)
             {
                 return null;
             }
@@ -71,7 +71,7 @@ namespace AquaMan.WebsocketAdapter.Test
                 }
             }
 
-            if(found.Count == 0)
+            if (found.Count == 0)
             {
                 return null;
             }

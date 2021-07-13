@@ -14,7 +14,10 @@ namespace AquaMan.Domain.Test
         [Fact]
         public void OnJoinGame_ShouldPass()
         {
-            var player = new Player(new Guid().ToString(), "");
+            var player = new Player(
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(), 
+                "");
             player.OnJoinGame("game1");
 
             Assert.Equal(PlayerState.InGame, player.State);
@@ -25,7 +28,10 @@ namespace AquaMan.Domain.Test
         [InlineData("game1", "game1")]
         public void OnJoinGame_ShouldThrowInGameExcpetion(string currentGameId, string gameIdToJoin)
         {
-            var player = new Player(new Guid().ToString(), currentGameId);
+            var player = new Player(
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(), 
+                currentGameId);
 
             PlayerAlreadyInGameException expected = null;
 
@@ -48,7 +54,11 @@ namespace AquaMan.Domain.Test
         [InlineData("game1","game1")]
         public void OnQuitGame_ShouldPass(string currentGameId, string gameIdToQuit)
         {
-            var player = new Player(new Guid().ToString(), currentGameId);
+            var player = new Player(
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(), 
+                currentGameId
+                );
 
             player.OnQuitGame(gameIdToQuit);
 
@@ -60,7 +70,11 @@ namespace AquaMan.Domain.Test
         [InlineData("game1", "game2")]
         public void OnQuitGame_ShouldThrowPlayerNotInTheGameException(string currentGameId, string gameIdToQuit)
         {
-            var player = new Player(new Guid().ToString(), currentGameId);
+            var player = new Player(
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(), 
+                currentGameId
+                );
 
             PlayerNotInTheGameException expected = null;
 
@@ -82,7 +96,11 @@ namespace AquaMan.Domain.Test
         [InlineData(0)]
         public void OnHitEvent_ShouldPass(int killPosibility)
         {
-            var player = new Player(new Guid().ToString(), "fish_1");
+            var player = new Player(
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(), 
+                "fish_1"
+                );
 
             var hitEvent = new HitEvent(
                 hitBy: new HitBy(player),
