@@ -10,8 +10,9 @@ namespace AquaMan.WebsocketAdapter.Test
 {
     public class GameRoomTest
     {
-        private Startup _startup;
-        public GameRoomTest()
+
+
+        private Startup StartServer(int port)
         {
             var accountRepo = new InMemoryAccountRepository();
             var accountService = new AccountService(accountRepo);
@@ -19,24 +20,28 @@ namespace AquaMan.WebsocketAdapter.Test
             var playerRepo = new InMemoryPlayerRepository();
             var playerService = new PlayerService(playerRepo);
 
-            _startup = new Startup(
-                port: 8082,
+            var startup = new Startup(
+                port: port,
                 accountService: accountService,
                 playerService: playerService
                 );
 
-            _startup.Start();
+            startup.Start();
+
+            return startup;
         }
 
         [Fact]
         public void JoinGame_ShouldPass()
         {
+            var port = 8082;
+            var startup = StartServer(port);
             ManualResetEvent LoginEvent = new ManualResetEvent(false);
             ManualResetEvent JoinGameEvent = new ManualResetEvent(false);
 
             string token = string.Empty;
 
-            var url = new Uri("ws://127.0.0.1:8082");
+            var url = new Uri("ws://127.0.0.1:"+ port);
 
             string receivedMessage = string.Empty;
             Event<JoinedGame> joinedGameEvent = null;
@@ -106,12 +111,14 @@ namespace AquaMan.WebsocketAdapter.Test
         [Fact]
         public void JoinGame_ShouldReceivedError()
         {
+            int port = 8083;
+            var startup = StartServer(port);
             ManualResetEvent LoginEvent = new ManualResetEvent(false);
             ManualResetEvent ErrorEvent = new ManualResetEvent(false);
 
             string token = string.Empty;
 
-            var url = new Uri("ws://127.0.0.1:8082");
+            var url = new Uri("ws://127.0.0.1:"+ port);
 
             Event<Error> errorEvent = null;
 
@@ -176,13 +183,15 @@ namespace AquaMan.WebsocketAdapter.Test
         [Fact]
         public void JoinGame_ShouldReceiveBroadcastMessge()
         {
+            int port = 8084;
+            var startup = StartServer(port);
             ManualResetEvent LoginEvent = new ManualResetEvent(false);
             ManualResetEvent JoinGameEvent = new ManualResetEvent(false);
             ManualResetEvent BroadcastJoinGameEvent = new ManualResetEvent(false);
 
             string token = string.Empty;
 
-            var url = new Uri("ws://127.0.0.1:8082");
+            var url = new Uri("ws://127.0.0.1:"+ port);
 
             Event<JoinedGame> broadcastedJoinGameEvent = null;
 
@@ -313,5 +322,260 @@ namespace AquaMan.WebsocketAdapter.Test
             Assert.Equal("ricky_3", broadcastedJoinGameEvent.Payload.Name);
         }
 
+        [Fact]
+        public void QuitGame_ShouldPass()
+        {
+            int port = 8085;
+            var startup = StartServer(port);
+            ManualResetEvent LoginEvent = new ManualResetEvent(false);
+            ManualResetEvent JoinGameEvent = new ManualResetEvent(false);
+            ManualResetEvent QuitGameEvent = new ManualResetEvent(false);
+
+            var url = new Uri("ws://127.0.0.1:"+ 8085);
+
+            var token = string.Empty;
+
+            Event<QuitGame> quitGameEvent = null;
+
+            using(var client = new WebsocketClient(url))
+            {
+                client.ReconnectTimeout = TimeSpan.FromSeconds(30);
+                client.ReconnectionHappened.Subscribe(info => Console.WriteLine($"Reconnection happend, type: {info.Type}"));
+
+                client.MessageReceived.Subscribe(msg =>
+                {
+                    var eventType = Utils.ParseEventType(msg.Text);
+
+                    if (eventType == (int)EventType.LoggedIn)
+                    {
+                        var loginEvent = JsonConvert.DeserializeObject<Event<LoggedIn>>(msg.Text);
+                        token = loginEvent.Payload.Token;
+                        LoginEvent.Set();
+                    }
+                    else if (eventType == (int)EventType.JoinedGame)
+                    {
+                        var joinedGameEvent = JsonConvert.DeserializeObject<Event<JoinedGame>>(msg.Text);
+                        JoinGameEvent.Set();
+                    }else if(eventType == (int)EventType.QuitGame)
+                    {
+                        quitGameEvent = JsonConvert.DeserializeObject<Event<QuitGame>>(msg.Text);
+                        QuitGameEvent.Set();
+                    }
+                    else if (eventType == (int)EventType.Error)
+                    {
+                        var errorEvent = JsonConvert.DeserializeObject<Event<Error>>(msg.Text);
+                    }
+                });
+                client.Start();
+
+                var loginCommand = new Command<CommandPayload.Login>()
+                {
+                    CommandType = (int)CommandType.Login,
+                    Payload = new CommandPayload.Login()
+                    {
+                        Name = "ricky_1",
+                        Password = "123456",
+                        AgentId = "agentId_1",
+                        Money = new Entity.Money(
+                            currency: Domain.Entity.Currency.CNY,
+                            amount: 10000,
+                            precise: 100
+                            )
+                    }
+                };
+
+                client.Send(JsonConvert.SerializeObject(loginCommand));
+                LoginEvent.WaitOne();
+
+                var joinGameCommand = new Command<CommandPayload.JoinGame>()
+                {
+                    CommandType = (int)CommandType.JoinGame,
+                    Payload = new CommandPayload.JoinGame()
+                    {
+                        Token = token
+                    }
+                };
+                client.Send(JsonConvert.SerializeObject(joinGameCommand));
+                JoinGameEvent.WaitOne();
+
+                var quitGameCommand = new Command<CommandPayload.QuitGame>()
+                {
+                    CommandType = (int)CommandType.QuitGame,
+                    Payload = new CommandPayload.QuitGame()
+                    {
+                        Token = token
+                    }
+                };
+
+                client.Send(JsonConvert.SerializeObject(quitGameCommand));
+                QuitGameEvent.WaitOne();
+            }
+
+            Assert.Equal("ricky_1", quitGameEvent.Payload.Name);
+            Assert.Equal(0, quitGameEvent.Payload.Slot);
+        }
+
+        [Fact]
+        public void QuitGame_ShouldReceiveBroadcastMessage()
+        {
+            int port = 8086;
+            var startup = StartServer(port);
+            ManualResetEvent LoginEvent = new ManualResetEvent(false);
+            ManualResetEvent JoinGameEvent = new ManualResetEvent(false);
+            ManualResetEvent QuitGameEvent = new ManualResetEvent(false);
+
+            var url = new Uri("ws://127.0.0.1:"+ port);
+
+            var name1 = Guid.NewGuid().ToString();
+            var name2 = Guid.NewGuid().ToString();
+
+            var token = string.Empty;
+
+            Event<QuitGame> quitGameEvent = null;
+            // client 1 join game
+            using(var client = new WebsocketClient(url))
+            using(var client2= new WebsocketClient(url))
+            {
+                client.ReconnectTimeout = TimeSpan.FromSeconds(30);
+                client.ReconnectionHappened.Subscribe(info => Console.WriteLine($"Reconnection happend, type: {info.Type}"));
+
+                client.MessageReceived.Subscribe(msg =>
+                {
+                    var eventType = Utils.ParseEventType(msg.Text);
+
+                    if (eventType == (int)EventType.LoggedIn)
+                    {
+                        var loginEvent = JsonConvert.DeserializeObject<Event<LoggedIn>>(msg.Text);
+                        token = loginEvent.Payload.Token;
+                        LoginEvent.Set();
+                    }
+                    else if (eventType == (int)EventType.JoinedGame)
+                    {
+                        var joinedGameEvent = JsonConvert.DeserializeObject<Event<JoinedGame>>(msg.Text);
+                        JoinGameEvent.Set();
+                    }
+                    else if (eventType == (int)EventType.QuitGame)
+                    {
+                        var tmp = JsonConvert.DeserializeObject<Event<QuitGame>>(msg.Text);
+                        if(tmp.Payload.Name == name2)
+                        {
+                            quitGameEvent = tmp;
+                            QuitGameEvent.Set();
+                        }
+                    }
+                    else if (eventType == (int)EventType.Error)
+                    {
+                        var errorEvent = JsonConvert.DeserializeObject<Event<Error>>(msg.Text);
+                    }
+                });
+                client.Start();
+
+                var loginCommand = new Command<CommandPayload.Login>()
+                {
+                    CommandType = (int)CommandType.Login,
+                    Payload = new CommandPayload.Login()
+                    {
+                        Name = name1,
+                        Password = "123456",
+                        AgentId = "agentId_1",
+                        Money = new Entity.Money(
+                            currency: Domain.Entity.Currency.CNY,
+                            amount: 10000,
+                            precise: 100
+                            )
+                    }
+                };
+
+                client.Send(JsonConvert.SerializeObject(loginCommand));
+                LoginEvent.WaitOne();
+
+                var joinGameCommand = new Command<CommandPayload.JoinGame>()
+                {
+                    CommandType = (int)CommandType.JoinGame,
+                    Payload = new CommandPayload.JoinGame()
+                    {
+                        Token = token
+                    }
+                };
+                client.Send(JsonConvert.SerializeObject(joinGameCommand));
+                JoinGameEvent.WaitOne();
+
+                LoginEvent.Reset();
+                JoinGameEvent.Reset();
+
+                client2.ReconnectTimeout = TimeSpan.FromSeconds(30);
+                client2.ReconnectionHappened.Subscribe(info => Console.WriteLine($"Reconnection happend, type: {info.Type}"));
+
+                client2.MessageReceived.Subscribe(msg =>
+                {
+                    var eventType = Utils.ParseEventType(msg.Text);
+
+                    if (eventType == (int)EventType.LoggedIn)
+                    {
+                        var loginEvent = JsonConvert.DeserializeObject<Event<LoggedIn>>(msg.Text);
+                        token = loginEvent.Payload.Token;
+                        LoginEvent.Set();
+                    }
+                    else if (eventType == (int)EventType.JoinedGame)
+                    {
+                        var joinedGameEvent = JsonConvert.DeserializeObject<Event<JoinedGame>>(msg.Text);
+                        JoinGameEvent.Set();
+                    }
+                    else if (eventType == (int)EventType.QuitGame)
+                    {
+                        
+                    }
+                    else if (eventType == (int)EventType.Error)
+                    {
+                        var errorEvent = JsonConvert.DeserializeObject<Event<Error>>(msg.Text);
+                    }
+                });
+                client2.Start();
+                loginCommand = new Command<CommandPayload.Login>()
+                {
+                    CommandType = (int)CommandType.Login,
+                    Payload = new CommandPayload.Login()
+                    {
+                        Name = name2,
+                        Password = "123456",
+                        AgentId = "agentId_1",
+                        Money = new Entity.Money(
+                          currency: Domain.Entity.Currency.CNY,
+                          amount: 10000,
+                          precise: 100
+                          )
+                    }
+                };
+
+                client2.Send(JsonConvert.SerializeObject(loginCommand));
+                LoginEvent.WaitOne();
+
+                joinGameCommand = new Command<CommandPayload.JoinGame>()
+                {
+                    CommandType = (int)CommandType.JoinGame,
+                    Payload = new CommandPayload.JoinGame()
+                    {
+                        Token = token
+                    }
+                };
+                client2.Send(JsonConvert.SerializeObject(joinGameCommand));
+                JoinGameEvent.WaitOne();
+
+                var quitGameCommand = new Command<CommandPayload.QuitGame>()
+                {
+                    CommandType = (int)CommandType.QuitGame,
+                    Payload = new CommandPayload.QuitGame()
+                    {
+                        Token = token
+                    }
+                };
+
+                client2.Send(JsonConvert.SerializeObject(quitGameCommand));
+                QuitGameEvent.WaitOne();
+            }
+
+            Assert.NotNull(quitGameEvent);
+            Assert.Equal(name2, quitGameEvent.Payload.Name);
+        }
     }
 }

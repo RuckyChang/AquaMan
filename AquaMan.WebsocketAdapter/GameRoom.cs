@@ -5,12 +5,14 @@ using Fleck;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
+using static AquaMan.WebsocketAdapter.CommandPayload;
 
 namespace AquaMan.WebsocketAdapter
 {
     public class GameRoom
     {
-        private object _joinRoomLock = new object();
+        private object _roomLock = new object();
+        
         public string ID { get; }
         private AccountService _accountService;
         private PlayerService _playerService;
@@ -30,7 +32,7 @@ namespace AquaMan.WebsocketAdapter
 
         public void JoinGame(IWebSocketConnection socket, string message)
         {
-            var command = JsonConvert.DeserializeObject<Command<CommandPayload.JoinGame>>(message);
+            var command = JsonConvert.DeserializeObject<Command<JoinGame>>(message);
             
             var account = _accountService.OfToken(command.Payload.Token);
 
@@ -46,53 +48,89 @@ namespace AquaMan.WebsocketAdapter
 
             player.OnJoinGame(ID);
             _playerService.Save(player);
-
-            int slot = 0;
-
-            lock (_joinRoomLock)
+            ConnectedClient connectedClient;
+            lock (_roomLock)
             {
                 if(sockets.Count >= 4)
                 {
                     throw new RoomIsFullException($@"Room is full, id: {ID}");
                 }
 
-                slot = sockets.Count;
-
-                if (!sockets.TryAdd(
-                    socket.ConnectionInfo.Id,
-                    new ConnectedClient(
+                connectedClient = new ConnectedClient(
                         socket: socket,
                         account: account,
-                        player: player
-                        )
-                    )){
+                        player: player,
+                        slot: sockets.Count
+                        );
+
+                if (!sockets.TryAdd(
+                        socket.ConnectionInfo.Id,
+                        connectedClient
+                    )
+                ){
                     throw new JoinGameFailedException($@"Join game failed: {socket.ConnectionInfo.Id}, Id: {ID}");
                 }
             }
 
-            Broadcasd(EventType.JoinedGame, new EventPayload.JoinedGame()
+            Broadcast(EventType.JoinedGame, new EventPayload.JoinedGame()
             {
                 Name = account.Name,
-                Slot = slot
+                Slot = connectedClient.Slot
             });
         }
 
-
-
-
-
-
-        private void Broadcasd<TPayload>(EventType eventType, TPayload payload)
+        public void QuitGame(IWebSocketConnection socket, string message)
         {
-            foreach(var connectedClient in sockets.Values)
-            {
-                var event2Send = new Event<TPayload>()
-                {
-                    EventType = (int)eventType,
-                    Payload = payload
-                };
+            var command = JsonConvert.DeserializeObject<Command<QuitGame>>(message);
 
-                connectedClient.Socket.Send(JsonConvert.SerializeObject(event2Send));
+            ConnectedClient connectedClient;
+            lock (_roomLock)
+            {
+
+                if (!sockets.TryRemove(socket.ConnectionInfo.Id, out connectedClient))
+                {
+                    throw new JoinGameFailedException($@"Join game failed: {socket.ConnectionInfo.Id}, Id: {ID}");
+                }
+            }
+
+            var player = _playerService.OfAccountId(connectedClient.Account.ID);
+
+            player.OnQuitGame();
+
+            var event2Send = new Event<EventPayload.QuitGame>()
+            {
+                EventType = (int)EventType.QuitGame,
+                Payload = new EventPayload.QuitGame()
+                {
+                    Name = connectedClient.Account.Name,
+                    Slot = connectedClient.Slot
+                }
+            };
+
+            var message2Send = JsonConvert.SerializeObject(event2Send);
+
+            connectedClient.Socket.Send(message2Send);
+
+            Broadcast(message2Send);
+        }
+
+     
+
+        private void Broadcast<TPayload>(EventType eventType, TPayload payload)
+        {
+            var event2Send = new Event<TPayload>()
+            {
+                EventType = (int)eventType,
+                Payload = payload
+            };
+            Broadcast(JsonConvert.SerializeObject(event2Send));
+        }
+
+        private void Broadcast(string message)
+        {
+            foreach (var connectedClient in sockets.Values)
+            {
+                connectedClient.Socket.Send(message);
             }
         }
 
@@ -102,12 +140,19 @@ namespace AquaMan.WebsocketAdapter
             public Player Player { get; }
 
             public Account Account { get; }
+            public int Slot { get;  }
 
-            public ConnectedClient(IWebSocketConnection socket, Player player, Account account)
+            public ConnectedClient(
+                IWebSocketConnection socket, 
+                Player player, 
+                Account account,
+                int slot
+                )
             {
                 Socket = socket;
                 Player = player;
                 Account = account;
+                Slot = slot;
             }
         }
     }

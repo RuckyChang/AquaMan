@@ -52,6 +52,8 @@ namespace AquaMan.WebsocketAdapter
                 };
             });
         }
+
+        
         public void HandleMessge(IWebSocketConnection socket, string message)
         {
             var command = JsonConvert.DeserializeObject<Command>(message);
@@ -67,6 +69,9 @@ namespace AquaMan.WebsocketAdapter
                         break;
                     case CommandType.JoinGame:
                         _gameRoom.JoinGame(socket, message);
+                        break;
+                    case CommandType.QuitGame:
+                        _gameRoom.QuitGame(socket, message);
                         break;
                     default:
                         throw new NoSuchCommandException(command.CommandType);

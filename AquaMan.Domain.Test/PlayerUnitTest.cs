@@ -60,35 +60,10 @@ namespace AquaMan.Domain.Test
                 currentGameId
                 );
 
-            player.OnQuitGame(gameIdToQuit);
+            player.OnQuitGame();
 
             Assert.Empty(player.CurrentGameRoomId);
             Assert.Equal(PlayerState.NotInGame, player.State);
-        }
-
-        [Theory]
-        [InlineData("game1", "game2")]
-        public void OnQuitGame_ShouldThrowPlayerNotInTheGameException(string currentGameId, string gameIdToQuit)
-        {
-            var player = new Player(
-                Guid.NewGuid().ToString(),
-                Guid.NewGuid().ToString(), 
-                currentGameId
-                );
-
-            PlayerNotInTheGameException expected = null;
-
-            try
-            {
-                player.OnQuitGame(gameIdToQuit);
-            }catch(PlayerNotInTheGameException e)
-            {
-                expected = e;
-            }
-
-            Assert.NotNull(expected);
-            Assert.Equal(PlayerState.InGame, player.State);
-            Assert.Equal(currentGameId, player.CurrentGameRoomId);
         }
 
         [Theory]

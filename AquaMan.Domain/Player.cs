@@ -47,13 +47,8 @@ namespace AquaMan.Domain
             CurrentGameRoomId = gameIdToJoin;
         }
 
-        public void OnQuitGame(string gameIdToQuit)
+        public void OnQuitGame()
         {
-            if(CurrentGameRoomId != gameIdToQuit)
-            {
-                throw new PlayerNotInTheGameException(CurrentGameRoomId, gameIdToQuit);
-            }
-
             CurrentGameRoomId = string.Empty;
         }
 

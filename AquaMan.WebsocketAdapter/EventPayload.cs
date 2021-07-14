@@ -5,7 +5,9 @@
         Error = -1,
         LoggedIn,
         LoggedOut,
-        JoinedGame
+        JoinedGame,
+        QuitGame,
+
     }
 
     public class EventPayload
@@ -29,6 +31,12 @@
 
         #region game
         public class JoinedGame
+        {
+            public string Name { get; set; }
+            public int Slot { get; set; }
+        }
+
+        public class QuitGame
         {
             public string Name { get; set; }
             public int Slot { get; set; }

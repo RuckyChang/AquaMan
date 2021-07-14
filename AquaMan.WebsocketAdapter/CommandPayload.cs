@@ -7,7 +7,8 @@ namespace AquaMan.WebsocketAdapter
     {
         Login,
         Logout,
-        JoinGame
+        JoinGame,
+        QuitGame,
     }
     
     public class CommandPayload
@@ -29,6 +30,9 @@ namespace AquaMan.WebsocketAdapter
         public class JoinGame: AuthorizedPayload
         {
 
+        }
+
+        public class QuitGame: AuthorizedPayload { 
         }
         #endregion
     }
