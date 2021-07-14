@@ -45,8 +45,8 @@ namespace AquaMan.Domain.Test
 
             Assert.Equal(PlayerState.InGame, player.State);
             Assert.NotNull(expected);
-            Assert.Equal(currentGameId, player.CurrentGameId);
-            Assert.Equal(expected.CurrentGameId, player.CurrentGameId);
+            Assert.Equal(currentGameId, player.CurrentGameRoomId);
+            Assert.Equal(expected.CurrentGameId, player.CurrentGameRoomId);
             Assert.Equal(expected.GameIdToJoin, gameIdToJoin);
         }
 
@@ -62,7 +62,7 @@ namespace AquaMan.Domain.Test
 
             player.OnQuitGame(gameIdToQuit);
 
-            Assert.Empty(player.CurrentGameId);
+            Assert.Empty(player.CurrentGameRoomId);
             Assert.Equal(PlayerState.NotInGame, player.State);
         }
 
@@ -88,7 +88,7 @@ namespace AquaMan.Domain.Test
 
             Assert.NotNull(expected);
             Assert.Equal(PlayerState.InGame, player.State);
-            Assert.Equal(currentGameId, player.CurrentGameId);
+            Assert.Equal(currentGameId, player.CurrentGameRoomId);
         }
 
         [Theory]

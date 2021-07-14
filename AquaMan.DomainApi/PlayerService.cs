@@ -12,23 +12,24 @@ namespace AquaMan.DomainApi
             _repo = repo;
         }
 
-        public Player CreatePlayer(string accountId, string gameId)
+        public Player CreatePlayer(string accountId, string gameRoomId)
         {
+
             if(accountId == null || accountId == string.Empty)
             {
                 throw new ArgumentInvalidException(nameof(accountId));
             }
 
-            if(gameId ==null)
+            if(gameRoomId ==null)
             {
-                throw new ArgumentInvalidException(nameof(gameId));
+                throw new ArgumentInvalidException(nameof(gameRoomId));
             }
 
             var player = new Player(
-                id: new Guid().ToString(),
-                accountId: accountId,
-                gameId: gameId
-                );
+                  id: new Guid().ToString(),
+                  accountId: accountId,
+                  gameRoomId: gameRoomId
+            );
 
             if (_repo.Save(player))
             {
@@ -36,6 +37,31 @@ namespace AquaMan.DomainApi
             }
 
             return null;
+        }
+
+        public Player OfAccountId(string accountId)
+        {
+            if(accountId == null || accountId == string.Empty)
+            {
+                throw new ArgumentInvalidException(nameof(accountId));
+            }
+
+            var player = _repo.OfAccountId(accountId);
+
+            if (player == null)
+            {
+                player = new Player(
+                      id: new Guid().ToString(),
+                      accountId: accountId
+                );
+            }
+
+            return player;
+        }
+
+        public void Save(Player player)
+        {
+            _repo.Save(player);
         }
     }
 }

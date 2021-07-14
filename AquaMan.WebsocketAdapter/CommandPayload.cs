@@ -1,4 +1,5 @@
 ﻿using AquaMan.WebsocketAdapter.Entity;
+using System.Collections.Generic;
 
 namespace AquaMan.WebsocketAdapter
 {
@@ -6,7 +7,6 @@ namespace AquaMan.WebsocketAdapter
     {
         Login,
         Logout,
-        ListGame,
         JoinGame
     }
     
@@ -23,10 +23,6 @@ namespace AquaMan.WebsocketAdapter
 
         public class Logout: AuthorizedPayload
         {
-        }
-        public class ListGame: AuthorizedPayload
-        {
-
         }
         #endregion
         #region game

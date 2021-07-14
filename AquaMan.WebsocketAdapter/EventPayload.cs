@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AquaMan.WebsocketAdapter
+﻿namespace AquaMan.WebsocketAdapter
 {
     public enum EventType
     {
         Error = -1,
         LoggedIn,
         LoggedOut,
-        ListedGame,
         JoinedGame
     }
 
@@ -20,7 +13,9 @@ namespace AquaMan.WebsocketAdapter
         public class Error
         {
             public string ErrorCode { get; set; }
+            public string ErrorMessage { get; set; }
         }
+        #region lobby
         public class LoggedIn
         {
             public string Token { get; set; }
@@ -30,5 +25,14 @@ namespace AquaMan.WebsocketAdapter
         {
 
         }
+        #endregion
+
+        #region game
+        public class JoinedGame
+        {
+            public string Name { get; set; }
+            public int Slot { get; set; }
+        }
+        #endregion
     }
 }

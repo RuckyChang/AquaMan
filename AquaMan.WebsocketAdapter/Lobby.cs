@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using AquaMan.Domain;
+﻿using AquaMan.Domain;
 using AquaMan.DomainApi;
 using Fleck;
 using Newtonsoft.Json;
@@ -10,6 +8,7 @@ namespace AquaMan.WebsocketAdapter
     public partial class Lobby
     {
         private AccountService _accountService;
+        
 
         public Lobby(AccountService accountService)
         {
@@ -80,15 +79,6 @@ namespace AquaMan.WebsocketAdapter
                 EventType = (int)EventType.LoggedOut,
                 Payload = new EventPayload.LoggedOut()
             }));
-        }
-
-        public void ListGame(IWebSocketConnection socket, string message)
-        {
-            // todo: finish this.
-            // mock
-            // name
-            // gameId
-            //
         }
     }
 }

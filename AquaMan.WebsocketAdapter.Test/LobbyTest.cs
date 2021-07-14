@@ -10,16 +10,28 @@ namespace AquaMan.WebsocketAdapter.Test
 {
     public class LobbyTest
     {
-        [Fact]
-        public void Login_shouldPass()
+        private Startup _startup;
+        public LobbyTest()
         {
-            ManualResetEvent ExitEvent = new ManualResetEvent(false);
-
             var accountRepo = new InMemoryAccountRepository();
             var accountService = new AccountService(accountRepo);
 
-            var lobby = new Lobby(accountService);
-            lobby.Start();
+            var playerRepo = new InMemoryPlayerRepository();
+            var playerService = new PlayerService(playerRepo);
+
+            _startup = new Startup(
+                port: 8081,
+                accountService: accountService,
+                playerService: playerService
+                );
+
+            _startup.Start();
+        }
+
+        [Fact]
+        public void Login_ShouldPass()
+        {
+            ManualResetEvent ExitEvent = new ManualResetEvent(false);
 
             var url = new Uri("ws://127.0.0.1:8081");
 
@@ -36,10 +48,10 @@ namespace AquaMan.WebsocketAdapter.Test
                 } );
                 client.Start();
 
-                var command = new Command<Lobby.CommandPayload.Login>()
+                var command = new Command<CommandPayload.Login>()
                 {
-                    CommandType = (int)Lobby.CommandType.Login,
-                    Payload = new Lobby.CommandPayload.Login() {
+                    CommandType = (int)CommandType.Login,
+                    Payload = new CommandPayload.Login() {
                         Name = "ricky",
                         Password = "123456",
                         AgentId = "agentId_1",
@@ -57,7 +69,7 @@ namespace AquaMan.WebsocketAdapter.Test
 
             Assert.NotEmpty(receivedMessage);
 
-            var loginEvent = JsonConvert.DeserializeObject<Event<Lobby.EventPayload.LoggedIn>>(receivedMessage);
+            var loginEvent = JsonConvert.DeserializeObject<Event<EventPayload.LoggedIn>>(receivedMessage);
 
             Assert.NotEmpty(loginEvent.Payload.Token);
         }
@@ -69,12 +81,6 @@ namespace AquaMan.WebsocketAdapter.Test
         public void Login_ShouldNotPass(string name, string password, string agentId)
         {
             ManualResetEvent ExitEvent = new ManualResetEvent(false);
-
-            var accountRepo = new InMemoryAccountRepository();
-            var accountService = new AccountService(accountRepo);
-
-            var lobby = new Lobby(accountService);
-            lobby.Start();
 
             var url = new Uri("ws://127.0.0.1:8081");
 
@@ -91,10 +97,10 @@ namespace AquaMan.WebsocketAdapter.Test
                 });
                 client.Start();
 
-                var command = new Command<Lobby.CommandPayload.Login>()
+                var command = new Command<CommandPayload.Login>()
                 {
-                    CommandType = (int)Lobby.CommandType.Login,
-                    Payload = new Lobby.CommandPayload.Login()
+                    CommandType = (int)CommandType.Login,
+                    Payload = new CommandPayload.Login()
                     {
                         Name = name,
                         Password = password,
@@ -113,7 +119,7 @@ namespace AquaMan.WebsocketAdapter.Test
 
             Assert.NotEmpty(receivedMessage);
 
-            var errorEvent = JsonConvert.DeserializeObject<Event<Lobby.EventPayload.Error>>(receivedMessage);
+            var errorEvent = JsonConvert.DeserializeObject<Event<EventPayload.Error>>(receivedMessage);
 
             Assert.Equal(-1, errorEvent.EventType);
             Assert.NotEmpty(errorEvent.Payload.ErrorCode);
@@ -128,9 +134,6 @@ namespace AquaMan.WebsocketAdapter.Test
             var accountRepo = new InMemoryAccountRepository();
             var accountService = new AccountService(accountRepo);
 
-            var lobby = new Lobby(accountService);
-            lobby.Start();
-
             var url = new Uri("ws://127.0.0.1:8081");
 
             string receivedMessage = string .Empty;
@@ -143,17 +146,15 @@ namespace AquaMan.WebsocketAdapter.Test
 
                 client.MessageReceived.Subscribe(msg => {
 
-                    var eventType = ParseEventType(msg.Text);
+                    var eventType = Utils.ParseEventType(msg.Text);
                     if(eventType == 0)
                     {
                         //parse token out.
-                        var loginEvent = JsonConvert.DeserializeObject<Event<Lobby.EventPayload.LoggedIn>>(msg.Text);
+                        var loginEvent = JsonConvert.DeserializeObject<Event<EventPayload.LoggedIn>>(msg.Text);
 
                         token = loginEvent.Payload.Token;
                         LoginEvent.Set();
-                    }
-
-                    if(eventType == 1)
+                    }else if(eventType == 1)
                     {
                         receivedMessage = msg.Text;
                         ExitEvent.Set();
@@ -161,10 +162,10 @@ namespace AquaMan.WebsocketAdapter.Test
                 });
                 client.Start();
 
-                var loginCommand = new Command<Lobby.CommandPayload.Login>()
+                var loginCommand = new Command<CommandPayload.Login>()
                 {
-                    CommandType = (int)Lobby.CommandType.Login,
-                    Payload = new Lobby.CommandPayload.Login()
+                    CommandType = (int)CommandType.Login,
+                    Payload = new CommandPayload.Login()
                     {
                         Name = "ricky",
                         Password = "123456",
@@ -180,10 +181,10 @@ namespace AquaMan.WebsocketAdapter.Test
                 client.Send(JsonConvert.SerializeObject(loginCommand));
                 LoginEvent.WaitOne();
 
-                var logoutCommand = new Command<Lobby.CommandPayload.Logout>()
+                var logoutCommand = new Command<CommandPayload.Logout>()
                 {
-                    CommandType = (int)Lobby.CommandType.Logout,
-                    Payload = new Lobby.CommandPayload.Logout()
+                    CommandType = (int)CommandType.Logout,
+                    Payload = new CommandPayload.Logout()
                     {
                         Token = token
                     }
@@ -195,16 +196,11 @@ namespace AquaMan.WebsocketAdapter.Test
 
             Assert.NotEmpty(receivedMessage);
 
-            var logoutEvent = JsonConvert.DeserializeObject<Event<Lobby.EventPayload.LoggedOut>>(receivedMessage);
+            var logoutEvent = JsonConvert.DeserializeObject<Event<EventPayload.LoggedOut>>(receivedMessage);
 
             Assert.Equal(1, logoutEvent.EventType);
         }
 
-        private int ParseEventType(string message)
-        {
-            var eventPkg = JsonConvert.DeserializeObject<Event>(message);
-
-            return eventPkg.EventType;
-        }
+     
     }
 }

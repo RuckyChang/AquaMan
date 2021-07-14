@@ -32,7 +32,7 @@ namespace AquaMan.DomainApi
                 throw new ArgumentInvalidException(nameof(agentId));
             }
 
-            var id = new Guid().ToString();
+            var id = Guid.NewGuid().ToString();
 
             var account = new Account(
                 id: id,

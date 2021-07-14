@@ -1,24 +1,33 @@
 ﻿using AquaMan.DomainApi;
+using AquaMan.WebsocketAdapter.Exceptions;
 using Fleck;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
-using static AquaMan.WebsocketAdapter.Lobby;
 
 namespace AquaMan.WebsocketAdapter
 {
     public class Startup
     {
         WebSocketServer _server;
-        ConcurrentDictionary<Guid, IWebSocketConnection> sockets = new ConcurrentDictionary<Guid, IWebSocketConnection>();
-
         private Lobby _lobby;
+        // only one game room right now.
+        private GameRoom _gameRoom;
+        private ConcurrentDictionary<Guid, IWebSocketConnection> sockets = new ConcurrentDictionary<Guid, IWebSocketConnection>();
 
-        public Startup(AccountService accountService)
+        public Startup(
+            int port,
+            AccountService accountService,
+            PlayerService playerService
+            )
         {
-
+            _server = new WebSocketServer("ws://0.0.0.0:" + port);
             _lobby = new Lobby(accountService);
-
+            _gameRoom = new GameRoom(
+                Guid.NewGuid().ToString(), 
+                accountService, 
+                playerService
+            );
         }
 
         public void Start()
@@ -37,7 +46,6 @@ namespace AquaMan.WebsocketAdapter
                 socket.OnClose = () => Console.WriteLine("Close!");
                 socket.OnMessage = message =>
                 {
-
                     Console.WriteLine(message);
                     // parse message
                     HandleMessge(socket, message);
@@ -57,9 +65,11 @@ namespace AquaMan.WebsocketAdapter
                     case CommandType.Logout:
                         _lobby.Logout(socket, message);
                         break;
-                    case CommandType.ListGame:
-                        _lobby.ListGame(socket, message);
+                    case CommandType.JoinGame:
+                        _gameRoom.JoinGame(socket, message);
                         break;
+                    default:
+                        throw new NoSuchCommandException(command.CommandType);
                 }
             }
             catch (Exception exception)
@@ -71,7 +81,8 @@ namespace AquaMan.WebsocketAdapter
                         EventType = -1,
                         Payload = new EventPayload.Error()
                         {
-                            ErrorCode = "-1"
+                            ErrorCode = "-1",
+                            ErrorMessage = exception.Message
                         }
                     }
                     ));

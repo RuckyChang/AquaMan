@@ -19,36 +19,42 @@ namespace AquaMan.Domain
         {
             get
             {
-                return CurrentGameId == string.Empty ? PlayerState.NotInGame : PlayerState.InGame;
+                return CurrentGameRoomId == string.Empty ? PlayerState.NotInGame : PlayerState.InGame;
             }
         }
-        public string CurrentGameId { get; private set; }
+        public string CurrentGameRoomId { get; private set; } = string.Empty;
 
-        public Player(string id, string accountId, string gameId)
+        public Player(string id, string accountId)
         {
             ID = id;
             AccountId = accountId;
-            CurrentGameId = gameId;
+        }
+
+        public Player(string id, string accountId, string gameRoomId)
+        {
+            ID = id;
+            AccountId = accountId;
+            CurrentGameRoomId = gameRoomId;
         }
 
         public void OnJoinGame(string gameIdToJoin)
         {
-            if (CurrentGameId != string.Empty)
+            if (CurrentGameRoomId != string.Empty)
             {
-                throw new PlayerAlreadyInGameException(CurrentGameId, gameIdToJoin);
+                throw new PlayerAlreadyInGameException(AccountId, CurrentGameRoomId, gameIdToJoin);
             }
 
-            CurrentGameId = gameIdToJoin;
+            CurrentGameRoomId = gameIdToJoin;
         }
 
         public void OnQuitGame(string gameIdToQuit)
         {
-            if(CurrentGameId != gameIdToQuit)
+            if(CurrentGameRoomId != gameIdToQuit)
             {
-                throw new PlayerNotInTheGameException(CurrentGameId, gameIdToQuit);
+                throw new PlayerNotInTheGameException(CurrentGameRoomId, gameIdToQuit);
             }
 
-            CurrentGameId = string.Empty;
+            CurrentGameRoomId = string.Empty;
         }
 
         public (bool, DropCoinEvent) OnHitEvent(HitEvent e, int killPossibility)
@@ -77,10 +83,16 @@ namespace AquaMan.Domain
 
     public class PlayerAlreadyInGameException: Exception
     {
+        public string AccountId { get;  }
         public string CurrentGameId { get; }
         public string GameIdToJoin { get; }
-        public PlayerAlreadyInGameException(string currentGameId, string gameToJoin)
+        public PlayerAlreadyInGameException(
+            string accountId,
+            string currentGameId, 
+            string gameToJoin): 
+            base ($@"currentGameId: {currentGameId}, gameToJoin:{gameToJoin}, accountId: {accountId}")
         {
+            AccountId = accountId;
             CurrentGameId = currentGameId;
             GameIdToJoin = gameToJoin;
         }

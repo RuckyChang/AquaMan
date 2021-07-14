@@ -15,11 +15,11 @@ namespace AquaMan.DomainApi.Test
 
             var player = playerService.CreatePlayer(
                 accountId: "accountId_1",
-                gameId: "gameId_1"
+                gameRoomId: "gameId_1"
                 );
 
             Assert.Equal("accountId_1", player.AccountId);
-            Assert.Equal("gameId_1", player.CurrentGameId);
+            Assert.Equal("gameId_1", player.CurrentGameRoomId);
         }
     }
 
@@ -42,7 +42,7 @@ namespace AquaMan.DomainApi.Test
             return found;
         }
 
-        public List<Player> OfGameId(string gameid)
+        public List<Player> OfGameRoomId(string gameid)
         {
             List<Player> found = new List<Player>();
 
