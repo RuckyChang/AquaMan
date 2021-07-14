@@ -11,4 +11,9 @@
 
         public TPayload? Payload { get; set; }
     }
+
+    public class AuthorizedPayload
+    {
+        public string Token { get; set; }
+    }
 }
