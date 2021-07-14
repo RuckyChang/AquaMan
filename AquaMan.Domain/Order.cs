@@ -5,7 +5,7 @@ namespace AquaMan.Domain
 {
     public enum OrderType {
         DEPOSIT,
-        WITHDRAW
+        WITHDRAW,
     }
 
     public enum OrderStateType

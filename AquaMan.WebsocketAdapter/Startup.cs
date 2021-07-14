@@ -73,6 +73,9 @@ namespace AquaMan.WebsocketAdapter
                     case CommandType.QuitGame:
                         _gameRoom.QuitGame(socket, message);
                         break;
+                    case CommandType.Shoot:
+                        _gameRoom.Shoot(socket, message);
+                        break;
                     default:
                         throw new NoSuchCommandException(command.CommandType);
                 }

@@ -1,4 +1,6 @@
-﻿namespace AquaMan.WebsocketAdapter
+﻿using AquaMan.WebsocketAdapter.Entity;
+
+namespace AquaMan.WebsocketAdapter
 {
     public enum EventType
     {
@@ -7,6 +9,7 @@
         LoggedOut,
         JoinedGame,
         QuitGame,
+        Shot,
 
     }
 
@@ -40,6 +43,12 @@
         {
             public string Name { get; set; }
             public int Slot { get; set; }
+        }
+        public class Shot
+        {
+            public string Shooter { get; set; }
+            public int Slot { get; set; }
+            public ShotBullet ShotBullet { get; set;}
         }
         #endregion
     }

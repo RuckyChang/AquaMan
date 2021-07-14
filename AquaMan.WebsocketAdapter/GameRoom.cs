@@ -1,5 +1,8 @@
 ﻿using AquaMan.Domain;
+using AquaMan.Domain.Entity;
+using AquaMan.Domain.GameEvent;
 using AquaMan.DomainApi;
+using AquaMan.WebsocketAdapter.Entity;
 using AquaMan.WebsocketAdapter.Exceptions;
 using Fleck;
 using Newtonsoft.Json;
@@ -16,8 +19,9 @@ namespace AquaMan.WebsocketAdapter
         public string ID { get; }
         private AccountService _accountService;
         private PlayerService _playerService;
+        
 
-        private ConcurrentDictionary<Guid, ConnectedClient> sockets = new ConcurrentDictionary<Guid, ConnectedClient>();
+        private ConcurrentDictionary<Guid, ConnectedClient> connectedClients = new ConcurrentDictionary<Guid, ConnectedClient>();
 
         public GameRoom(
             string id,
@@ -51,7 +55,7 @@ namespace AquaMan.WebsocketAdapter
             ConnectedClient connectedClient;
             lock (_roomLock)
             {
-                if(sockets.Count >= 4)
+                if(connectedClients.Count >= 4)
                 {
                     throw new RoomIsFullException($@"Room is full, id: {ID}");
                 }
@@ -60,10 +64,10 @@ namespace AquaMan.WebsocketAdapter
                         socket: socket,
                         account: account,
                         player: player,
-                        slot: sockets.Count
+                        slot: connectedClients.Count
                         );
 
-                if (!sockets.TryAdd(
+                if (!connectedClients.TryAdd(
                         socket.ConnectionInfo.Id,
                         connectedClient
                     )
@@ -87,7 +91,7 @@ namespace AquaMan.WebsocketAdapter
             lock (_roomLock)
             {
 
-                if (!sockets.TryRemove(socket.ConnectionInfo.Id, out connectedClient))
+                if (!connectedClients.TryRemove(socket.ConnectionInfo.Id, out connectedClient))
                 {
                     throw new JoinGameFailedException($@"Join game failed: {socket.ConnectionInfo.Id}, Id: {ID}");
                 }
@@ -114,7 +118,55 @@ namespace AquaMan.WebsocketAdapter
             Broadcast(message2Send);
         }
 
-     
+        public void Shoot(IWebSocketConnection socket, string message)
+        {
+            //TODO: add throttle to limit the shoot range.
+
+            var command = JsonConvert.DeserializeObject<Command<Shoot>>(message);
+
+            ConnectedClient connectedClient;
+            if (!connectedClients.TryGetValue(socket.ConnectionInfo.Id, out connectedClient))
+            {
+                throw new ConnectionNotFoundException(socket.ConnectionInfo.Id);
+            }
+
+            // TODO: create bullet order.
+
+            connectedClient.Account.OnShootEvent(
+                new ShootEvent(
+                    shootBy: new ShootBy(
+                        account: connectedClient.Account,
+                        player: connectedClient.Player
+                        ),
+                    bulletName: "0",
+                    cost: new Cost(
+                        currency: connectedClient.Account.Wallet.Currency,
+                        amount: 1,
+                        precise: connectedClient.Account.Wallet.Precise
+                        )
+                    )
+                );
+            
+            _accountService.Save(connectedClient.Account);
+
+            var shotEvent = new Event<EventPayload.Shot>()
+            {
+                EventType = (int)EventType.Shot,
+                Payload =
+                {
+                    Shooter = connectedClient.Account.Name,
+                    Slot = connectedClient.Slot,
+                    ShotBullet = new ShotBullet()
+                    {
+                        StartFrom = command.Payload.ShotBullet.StartFrom,
+                        Direction = command.Payload.ShotBullet.Direction,
+                        Bullet = command.Payload.ShotBullet.Bullet
+                    }
+                }
+            };
+
+            Broadcast(JsonConvert.SerializeObject(shotEvent));
+        }
 
         private void Broadcast<TPayload>(EventType eventType, TPayload payload)
         {
@@ -128,7 +180,7 @@ namespace AquaMan.WebsocketAdapter
 
         private void Broadcast(string message)
         {
-            foreach (var connectedClient in sockets.Values)
+            foreach (var connectedClient in connectedClients.Values)
             {
                 connectedClient.Socket.Send(message);
             }
@@ -154,6 +206,8 @@ namespace AquaMan.WebsocketAdapter
                 Account = account;
                 Slot = slot;
             }
+
+            
         }
     }
 }
