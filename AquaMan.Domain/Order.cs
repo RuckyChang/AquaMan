@@ -23,7 +23,7 @@ namespace AquaMan.Domain
         public OrderState(OrderStateType stateType)
         {
             StateType = stateType;
-            OccurredAt = DateTime.Now;
+            OccurredAt = DateTime.UtcNow;
         }
     }
 
