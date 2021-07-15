@@ -1,4 +1,5 @@
-﻿using AquaMan.WebsocketAdapter.Entity;
+﻿using AquaMan.Domain.Entity;
+using AquaMan.WebsocketAdapter.Entity;
 
 namespace AquaMan.WebsocketAdapter
 {
@@ -10,7 +11,7 @@ namespace AquaMan.WebsocketAdapter
         JoinedGame,
         QuitGame,
         Shot,
-
+        TargetKilled
     }
 
     public class EventPayload
@@ -49,6 +50,13 @@ namespace AquaMan.WebsocketAdapter
             public string Shooter { get; set; }
             public int Slot { get; set; }
             public ShotBullet ShotBullet { get; set;}
+        }
+
+        public class TargetKilled
+        {
+            public string KilledBy { get; set; }
+            public int Slot { get; set; }
+            public Cost cost { get; set; }
         }
         #endregion
     }

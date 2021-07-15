@@ -9,7 +9,8 @@ namespace AquaMan.WebsocketAdapter
         Logout,
         JoinGame,
         QuitGame,
-        Shoot
+        Shoot,
+        HitTarget
     }
     
     public class CommandPayload
@@ -32,6 +33,12 @@ namespace AquaMan.WebsocketAdapter
         public class QuitGame: AuthorizedPayload {}
         public class Shoot: AuthorizedPayload { 
             public ShotBullet ShotBullet { get; set; }
+        }
+
+        public class HitTarget : AuthorizedPayload
+        {
+            public string HitBy { get; set; }
+            public string Target { get; set; }
         }
         #endregion
     }

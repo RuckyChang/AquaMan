@@ -134,8 +134,6 @@ namespace AquaMan.WebsocketAdapter
                 throw new ConnectionNotFoundException(socket.ConnectionInfo.Id);
             }
 
-            
-
             connectedClient.Shoot();
 
             var account = connectedClient.Account;
@@ -167,6 +165,11 @@ namespace AquaMan.WebsocketAdapter
             };
 
             Broadcast(JsonConvert.SerializeObject(shotEvent));
+        }
+
+        public void Hit(IWebSocketConnection socket, string message)
+        {
+            // TODO: finish this.
         }
 
         // TODO: add bulletRepository.
