@@ -1,7 +1,6 @@
-﻿using AquaMan.Domain.GameEvent;
-
-namespace AquaMan.WebsocketAdapter.Entity
+﻿namespace AquaMan.WebsocketAdapter.Entity
 {
+
     public class ShotBullet
     {
         public class Coordinate
@@ -10,8 +9,9 @@ namespace AquaMan.WebsocketAdapter.Entity
             public double Y { get; set; }
             public double Z { get; set; }
         }
+
         public Coordinate StartFrom { get; set; }
         public Coordinate Direction { get; set; }
-        public Bullet Bullet { get; set; }
+        public string BulletID { get; set; }
     }
 }

@@ -120,8 +120,7 @@ namespace AquaMan.WebsocketAdapter
 
         public void Shoot(IWebSocketConnection socket, string message)
         {
-            //TODO: add throttle to limit the shoot range.
-
+           
             var command = JsonConvert.DeserializeObject<Command<Shoot>>(message);
 
             ConnectedClient connectedClient;
@@ -130,29 +129,16 @@ namespace AquaMan.WebsocketAdapter
                 throw new ConnectionNotFoundException(socket.ConnectionInfo.Id);
             }
 
+            connectedClient.Shoot();
+
             // TODO: create bullet order.
 
-            connectedClient.Account.OnShootEvent(
-                new ShootEvent(
-                    shootBy: new ShootBy(
-                        account: connectedClient.Account,
-                        player: connectedClient.Player
-                        ),
-                    bulletName: "0",
-                    cost: new Cost(
-                        currency: connectedClient.Account.Wallet.Currency,
-                        amount: 1,
-                        precise: connectedClient.Account.Wallet.Precise
-                        )
-                    )
-                );
-            
             _accountService.Save(connectedClient.Account);
 
             var shotEvent = new Event<EventPayload.Shot>()
             {
                 EventType = (int)EventType.Shot,
-                Payload =
+                Payload = new EventPayload.Shot()
                 {
                     Shooter = connectedClient.Account.Name,
                     Slot = connectedClient.Slot,
@@ -160,7 +146,7 @@ namespace AquaMan.WebsocketAdapter
                     {
                         StartFrom = command.Payload.ShotBullet.StartFrom,
                         Direction = command.Payload.ShotBullet.Direction,
-                        Bullet = command.Payload.ShotBullet.Bullet
+                        BulletID = command.Payload.ShotBullet.BulletID
                     }
                 }
             };
@@ -193,6 +179,7 @@ namespace AquaMan.WebsocketAdapter
 
             public Account Account { get; }
             public int Slot { get;  }
+            private ShootThrottle _shootThrottle;
 
             public ConnectedClient(
                 IWebSocketConnection socket, 
@@ -205,9 +192,62 @@ namespace AquaMan.WebsocketAdapter
                 Player = player;
                 Account = account;
                 Slot = slot;
+                _shootThrottle = new ShootThrottle(this);
+            }
+            public void Shoot()
+            {
+
+                _shootThrottle.Increase();
+                Account.OnShootEvent(
+                new ShootEvent(
+                    shootBy: new ShootBy(
+                        account: Account,
+                        player: Player
+                        ),
+                    bulletName: "0",
+                    cost: new Cost(
+                        currency: Account.Wallet.Currency,
+                        amount: 1,
+                        precise: Account.Wallet.Precise
+                        )
+                    )
+                );
+            }
+        }
+
+        class ShootThrottle
+        {
+            private object _shootLock = new object();
+
+            private static TimeSpan Interval = TimeSpan.FromSeconds(1);
+            private int Rate = 20;
+            private DateTime timestamp = DateTime.UtcNow;
+            private int Counter { get; set; } = 0;
+            private ConnectedClient _client { get; }
+            public ShootThrottle(ConnectedClient client)
+            {
+                _client = client;
             }
 
-            
+            public ShootThrottle Increase()
+            {
+                lock (_shootLock)
+                {
+                    if(timestamp + Interval >= DateTime.UtcNow)
+                    {
+                        return new ShootThrottle(_client);
+                    }
+
+                    
+                    Counter += 1;
+                    if (Counter > Rate)
+                    {
+                        throw new ShootRateOverThrottleException(_client.Socket.ConnectionInfo.Id);
+                    }
+
+                    return this;
+                }
+            }
         }
     }
 }
