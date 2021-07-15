@@ -759,8 +759,11 @@ namespace AquaMan.WebsocketAdapter.Test
                     {
                         
                         var tmp = JsonConvert.DeserializeObject<Event<Shot>>(msg.Text);
-                        if(tmp.Payload.Shooter == )
-                        ShotEvent.Set();
+                        if(tmp.Payload.Shooter == clientName_2)
+                        {
+                            BroadcastShotEvent.Set();
+                            shotEvent = tmp;
+                        }
                     }
                     else if (eventType == (int)EventType.Error)
                     {
@@ -800,6 +803,9 @@ namespace AquaMan.WebsocketAdapter.Test
                 client.Send(JsonConvert.SerializeObject(joinGameCommand));
                 JoinGameEvent.WaitOne();
 
+                LoginEvent.Reset();
+                JoinGameEvent.Reset();
+
                 // TODO: client2 init.
                 client2.MessageReceived.Subscribe(msg =>
                 {
@@ -818,7 +824,7 @@ namespace AquaMan.WebsocketAdapter.Test
                     }
                     else if (eventType == (int)EventType.Shot)
                     {
-                        shotEvent = JsonConvert.DeserializeObject<Event<Shot>>(msg.Text);
+                        var tmp = JsonConvert.DeserializeObject<Event<Shot>>(msg.Text);
                         ShotEvent.Set();
                     }
                     else if (eventType == (int)EventType.Error)
@@ -827,12 +833,73 @@ namespace AquaMan.WebsocketAdapter.Test
                         ShotEvent.Set();
                     }
                 });
+                client2.Start();
 
+                // send login.
+                loginCommand = new Command<CommandPayload.Login>()
+                {
+                    CommandType = (int)CommandType.Login,
+                    Payload = new CommandPayload.Login()
+                    {
+                        Name = clientName_2,
+                        Password = "123456",
+                        AgentId = "agentId_1",
+                        Money = new Entity.Money(
+                            currency: Domain.Entity.Currency.CNY,
+                            amount: 10000,
+                            precise: 100
+                            )
+                    }
+                };
+                client2.Send(JsonConvert.SerializeObject(loginCommand));
+                LoginEvent.WaitOne();
 
+                // send join.
+                joinGameCommand = new Command<CommandPayload.JoinGame>()
+                {
+                    CommandType = (int)CommandType.JoinGame,
+                    Payload = new CommandPayload.JoinGame()
+                    {
+                        Token = token
+                    }
+                };
+                client2.Send(JsonConvert.SerializeObject(joinGameCommand));
+                JoinGameEvent.WaitOne();
+
+                // send shoot.
+                var shootCommand = new Command<CommandPayload.Shoot>()
+                {
+                    CommandType = (int)CommandType.Shoot,
+                    Payload = new CommandPayload.Shoot()
+                    {
+                        Token = token,
+                        ShotBullet = new Entity.ShotBullet()
+                        {
+                            StartFrom = startFrom,
+                            Direction = direction,
+                            BulletID = "0"
+                        }
+                    }
+                };
+
+                client2.Send(JsonConvert.SerializeObject(shootCommand));
+                ShotEvent.WaitOne();
             }
 
+            var payload = shotEvent.Payload;
 
+            Assert.Equal(clientName_2, payload.Shooter);
+            Assert.Equal(1, payload.Slot);
 
+            var shotBullet = payload.ShotBullet;
+            Assert.Equal("0", shotBullet.BulletID);
+            Assert.Equal(startFrom.X, shotBullet.StartFrom.X);
+            Assert.Equal(startFrom.Y, shotBullet.StartFrom.Y);
+            Assert.Equal(startFrom.Z, shotBullet.StartFrom.Z);
+
+            Assert.Equal(direction.X, shotBullet.Direction.X);
+            Assert.Equal(direction.Y, shotBullet.Direction.Y);
+            Assert.Equal(direction.Z, shotBullet.Direction.Z);
         }
     }
 }
