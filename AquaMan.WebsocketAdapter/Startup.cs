@@ -17,6 +17,7 @@ namespace AquaMan.WebsocketAdapter
 
         public Startup(
             int port,
+            BulletOrderService bulletOrderService,
             AccountService accountService,
             PlayerService playerService
             )
@@ -24,9 +25,11 @@ namespace AquaMan.WebsocketAdapter
             _server = new WebSocketServer("ws://0.0.0.0:" + port);
             _lobby = new Lobby(accountService);
             _gameRoom = new GameRoom(
-                Guid.NewGuid().ToString(), 
-                accountService, 
-                playerService
+                gameId: Guid.NewGuid().ToString(),
+                id: Guid.NewGuid().ToString(), 
+                bulletOrderService: bulletOrderService,
+                accountService: accountService, 
+                playerService: playerService
             );
         }
 

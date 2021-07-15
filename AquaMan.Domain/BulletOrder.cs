@@ -41,7 +41,7 @@ namespace AquaMan.Domain
         public string GameId { get; }
         public string GameRoomID { get; }
         public string AccountID { get; }
-        public BulletOrderState CurrentState { get; }
+        public BulletOrderState CurrentState { get; private set; }
         public List<BulletOrderState> StateLogs { get; }
         public List<HitTarget> HitTargets { get; } = new List<HitTarget>();
 
@@ -71,6 +71,12 @@ namespace AquaMan.Domain
         public void OnHit(HitTarget hitTaget)
         {
             HitTargets.Add(hitTaget);
+            if(CurrentState.StateType != BulletOrderStateType.HIT)
+            {
+                CurrentState = new BulletOrderState(BulletOrderStateType.HIT);
+                StateLogs.Add(CurrentState);
+                
+            }
         }
     }
 }

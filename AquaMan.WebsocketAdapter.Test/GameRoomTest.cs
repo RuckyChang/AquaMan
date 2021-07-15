@@ -20,10 +20,14 @@ namespace AquaMan.WebsocketAdapter.Test
             var playerRepo = new InMemoryPlayerRepository();
             var playerService = new PlayerService(playerRepo);
 
+            var bulletOrderRepo = new InMemoryBulletOrderRepository();
+            var bulletOrderService = new BulletOrderService(bulletOrderRepo);
+
             var startup = new Startup(
                 port: port,
                 accountService: accountService,
-                playerService: playerService
+                playerService: playerService,
+                bulletOrderService: bulletOrderService
                 );
 
             startup.Start();

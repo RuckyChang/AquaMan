@@ -16,22 +16,27 @@ namespace AquaMan.WebsocketAdapter
     {
         private object _roomLock = new object();
         
+        public string GameID { get; }
         public string ID { get; }
         private AccountService _accountService;
         private PlayerService _playerService;
-        
+        private BulletOrderService _bulletOrderService;
 
         private ConcurrentDictionary<Guid, ConnectedClient> connectedClients = new ConcurrentDictionary<Guid, ConnectedClient>();
 
         public GameRoom(
+            string gameId,
             string id,
             AccountService accountService,
-            PlayerService playerService
+            PlayerService playerService,
+            BulletOrderService bulletOrderService
             )
         {
+            GameID = gameId;
             ID = id;
             _accountService = accountService;
             _playerService = playerService;
+            _bulletOrderService = bulletOrderService;
         }
 
         public void JoinGame(IWebSocketConnection socket, string message)
@@ -129,9 +134,19 @@ namespace AquaMan.WebsocketAdapter
                 throw new ConnectionNotFoundException(socket.ConnectionInfo.Id);
             }
 
+            
+
             connectedClient.Shoot();
 
-            // TODO: create bullet order.
+            var account = connectedClient.Account;
+
+            _bulletOrderService.Create(
+                agentId: account.AgentId,
+                gameId: GameID,
+                gameRoomId: ID,
+                accountId: account.ID,
+                cost: GetBulletCost(command.Payload.ShotBullet.BulletID)
+            );
 
             _accountService.Save(connectedClient.Account);
 
@@ -152,6 +167,16 @@ namespace AquaMan.WebsocketAdapter
             };
 
             Broadcast(JsonConvert.SerializeObject(shotEvent));
+        }
+
+        // TODO: add bulletRepository.
+        private Cost GetBulletCost(string bulletID)
+        {
+            return new Cost(
+                currency: Currency.CNY,
+                amount: 100,
+                precise: 100
+            );
         }
 
         private void Broadcast<TPayload>(EventType eventType, TPayload payload)

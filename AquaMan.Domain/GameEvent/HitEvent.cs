@@ -8,18 +8,7 @@ namespace AquaMan.Domain.GameEvent
 
         public HitBy(Player player) { Player = player;  }
     }
-    public class Bullet
-    {
-        public string ID { get; }
-
-        public Cost Price { get; }
-
-        public Bullet(string id, Cost price)
-        {
-            ID = id;
-            Price = price;
-        }
-    }
+  
 
     public class HitEvent: Event
     {
