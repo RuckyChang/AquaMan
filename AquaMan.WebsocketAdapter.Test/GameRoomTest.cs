@@ -598,13 +598,13 @@ namespace AquaMan.WebsocketAdapter.Test
 
             Event<Shot> shotEvent = null;
 
-            var startFrom = new Entity.ShotBullet.Coordinate()
+            var startFrom = new Entity.Coordinate()
             {
                 X = 0,
                 Y = 0,
                 Z = 0,
             };
-            var direction = new Entity.ShotBullet.Coordinate()
+            var direction = new Entity.Coordinate()
             {
                 X = 1,
                 Y = 0,
@@ -725,13 +725,13 @@ namespace AquaMan.WebsocketAdapter.Test
 
             Event<Shot> shotEvent = null;
 
-            var startFrom = new Entity.ShotBullet.Coordinate()
+            var startFrom = new Entity.Coordinate()
             {
                 X = 0,
                 Y = 0,
                 Z = 0,
             };
-            var direction = new Entity.ShotBullet.Coordinate()
+            var direction = new Entity.Coordinate()
             {
                 X = 1,
                 Y = 0,

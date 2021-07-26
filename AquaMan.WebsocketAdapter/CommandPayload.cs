@@ -29,7 +29,10 @@ namespace AquaMan.WebsocketAdapter
         }
         #endregion
         #region game
-        public class JoinGame: AuthorizedPayload{}
+        public class JoinGame: AuthorizedPayload{
+            public string RoomId { get; set; }
+        }
+
         public class QuitGame: AuthorizedPayload {}
         public class Shoot: AuthorizedPayload { 
             public ShotBullet ShotBullet { get; set; }

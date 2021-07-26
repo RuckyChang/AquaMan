@@ -11,6 +11,7 @@ namespace AquaMan.WebsocketAdapter
     {
         WebSocketServer _server;
         private Lobby _lobby;
+        // TODO: let lobby manage game room.
         // only one game room right now.
         private GameRoom _gameRoom;
         private ConcurrentDictionary<Guid, IWebSocketConnection> sockets = new ConcurrentDictionary<Guid, IWebSocketConnection>();
@@ -26,7 +27,7 @@ namespace AquaMan.WebsocketAdapter
             _lobby = new Lobby(accountService);
             _gameRoom = new GameRoom(
                 gameId: Guid.NewGuid().ToString(),
-                id: Guid.NewGuid().ToString(), 
+                id: "fish_001", 
                 bulletOrderService: bulletOrderService,
                 accountService: accountService, 
                 playerService: playerService
@@ -59,9 +60,10 @@ namespace AquaMan.WebsocketAdapter
         
         public void HandleMessge(IWebSocketConnection socket, string message)
         {
-            var command = JsonConvert.DeserializeObject<Command>(message);
             try
             {
+
+                var command = JsonConvert.DeserializeObject<Command>(message);
                 switch ((CommandType)command.CommandType)
                 {
                     case CommandType.Login:

@@ -23,7 +23,7 @@ namespace AquaMan.DomainApi.Test
         }
     }
 
-    class InMemoryPlayerRepository : PlayerRepository
+    public class InMemoryPlayerRepository : PlayerRepository
     {
         private Dictionary<string, Player> _storage = new Dictionary<string, Player>();
         public Player OfAccountId(string accountId)

@@ -36,6 +36,7 @@ namespace AquaMan.WebsocketAdapter
         #region game
         public class JoinedGame
         {
+            public string RoomId { get; set; }
             public string Name { get; set; }
             public int Slot { get; set; }
         }

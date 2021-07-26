@@ -84,7 +84,8 @@ namespace AquaMan.WebsocketAdapter
             Broadcast(EventType.JoinedGame, new EventPayload.JoinedGame()
             {
                 Name = account.Name,
-                Slot = connectedClient.Slot
+                Slot = connectedClient.Slot,
+                RoomId = command.Payload.RoomId
             });
         }
 
