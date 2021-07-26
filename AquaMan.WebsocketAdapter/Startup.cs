@@ -47,7 +47,10 @@ namespace AquaMan.WebsocketAdapter
                         socket.Close();
                     }
                 };
-                socket.OnClose = () => Console.WriteLine("Close!");
+                socket.OnClose = () => {
+                    Console.WriteLine("Close!");
+                    _gameRoom.OnCloseConnection(socket);
+                };
                 socket.OnMessage = message =>
                 {
                     Console.WriteLine(message);

@@ -89,6 +89,39 @@ namespace AquaMan.WebsocketAdapter
             });
         }
 
+        public void OnCloseConnection(IWebSocketConnection socket)
+        {
+            ConnectedClient connectedClient;
+            lock (_roomLock)
+            {
+
+                if (!connectedClients.TryRemove(socket.ConnectionInfo.Id, out connectedClient))
+                {
+                    throw new JoinGameFailedException($@"Join game failed: {socket.ConnectionInfo.Id}, Id: {ID}");
+                }
+            }
+
+            var player = _playerService.OfAccountId(connectedClient.Account.ID);
+
+            player.OnQuitGame();
+
+            var event2Send = new Event<EventPayload.QuitGame>()
+            {
+                EventType = (int)EventType.QuitGame,
+                Payload = new EventPayload.QuitGame()
+                {
+                    Name = connectedClient.Account.Name,
+                    Slot = connectedClient.Slot
+                }
+            };
+
+            var message2Send = JsonConvert.SerializeObject(event2Send);
+
+            connectedClient.Socket.Send(message2Send);
+
+            Broadcast(message2Send);
+        }
+
         public void QuitGame(IWebSocketConnection socket, string message)
         {
             var command = JsonConvert.DeserializeObject<Command<QuitGame>>(message);
