@@ -15,7 +15,8 @@ namespace AquaMan.WebsocketAdapter
         TargetKilled,
         RotationChanged,
         GotRecentWorldState,
-        PlayerJoinedGame
+        PlayerJoinedGame,
+        RespawnedEnemies,
     }
 
     public class EventPayload
@@ -77,11 +78,18 @@ namespace AquaMan.WebsocketAdapter
             public List<PlayerInfo> PlayersInfo { get; set; }
             public long Timestamp { get; set; }
 
+            // add enemies.
+
         }
 
         public class PlayerJoinedGame
         {
             public PlayerInfo PlayerInfo { get; set; }
+        }
+
+        public class RespawnedEnemies
+        {
+            public List<Entity.Enemy> Enemies { get; set; }
         }
         #endregion
     }

@@ -1,5 +1,4 @@
-﻿using AquaMan.Domain.Entity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace AquaMan.Domain.Entity

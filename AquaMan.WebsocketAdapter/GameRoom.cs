@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using static AquaMan.WebsocketAdapter.CommandPayload;
 using static AquaMan.WebsocketAdapter.EventPayload;
 
@@ -24,9 +25,11 @@ namespace AquaMan.WebsocketAdapter
         private PlayerService _playerService;
         private BulletOrderService _bulletOrderService;
 
-        private Boolean[] Slots = { false, false, false, false };
+        private bool[] Slots = { false, false, false, false };
 
         private ConcurrentDictionary<Guid, ConnectedClient> connectedClients = new ConcurrentDictionary<Guid, ConnectedClient>();
+        private EnemyFactory enemyFactory;
+
 
         public GameRoom(
             string gameId,
@@ -41,6 +44,37 @@ namespace AquaMan.WebsocketAdapter
             _accountService = accountService;
             _playerService = playerService;
             _bulletOrderService = bulletOrderService;
+            enemyFactory = new EnemyFactory();
+            initRespawningEnemies();
+        }
+
+        private void initRespawningEnemies()
+        {
+            var _ = Task.Run(() =>
+            {
+                var random = new Random();
+                var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+                while (true)
+                {
+                    var current = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    if (timestamp + 3000 < current)
+                    {
+                        var enemies = enemyFactory.RespawnEnemies(random.Next(1, 5));
+                        timestamp = current;
+                        var respawnEnemiesMessage = JsonConvert.SerializeObject(new Event<RespawnedEnemies>()
+                        {
+                            EventType = (int)EventType.RespawnedEnemies,
+                            Payload = new RespawnedEnemies()
+                            {
+                                Enemies = enemies
+                            }
+                        });
+
+                        Broadcast("", respawnEnemiesMessage);
+                    }
+                }
+            });
         }
 
         public void JoinGame(IWebSocketConnection socket, string message)
@@ -345,6 +379,8 @@ namespace AquaMan.WebsocketAdapter
             );
         }
        
+        
+
         private void Broadcast<TPayload>(Guid id, EventType eventType, TPayload payload)
         {
             var event2Send = new Event<TPayload>()
@@ -357,11 +393,16 @@ namespace AquaMan.WebsocketAdapter
 
         private void Broadcast(Guid id, string message)
         {
+            Broadcast(id.ToString(), message);
+        }
+
+        private void Broadcast(string id, string message)
+        {
             foreach (var connectedClient in connectedClients.Values)
             {
-                if (connectedClient.Socket.ConnectionInfo.Id != id)
+                if (connectedClient.Socket.ConnectionInfo.Id.ToString() != id)
                 {
-                connectedClient.Socket.Send(message);
+                    connectedClient.Socket.Send(message);
                 }
             }
         }
