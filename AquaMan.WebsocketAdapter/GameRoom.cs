@@ -58,9 +58,9 @@ namespace AquaMan.WebsocketAdapter
                 while (true)
                 {
                     var current = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                    if (timestamp + 3000 < current)
+                    if (timestamp + 1000 < current)
                     {
-                        var enemies = enemyFactory.RespawnEnemies(random.Next(1, 5));
+                        var enemies = enemyFactory.RespawnEnemies(5);
                         timestamp = current;
                         var respawnEnemiesMessage = JsonConvert.SerializeObject(new Event<RespawnedEnemies>()
                         {

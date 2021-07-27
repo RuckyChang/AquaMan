@@ -91,14 +91,16 @@ namespace AquaMan.WebsocketAdapter
         private List<PatrolPoint> GenerateRandomPatrols(Point respawnPoint, int count)
         {
             List<PatrolPoint> patrolPoints = new List<PatrolPoint>();
-            
-            for(int i = 0; i< count; i++)
+
+
+            for (int i = 0; i< count; i++)
             {
                 // seconds
-                int duration = _random.Next(3, 5);
+                
                 int speed = _random.Next(100, 150);
                 if (i > 0)
                 {
+                    int duration = _random.Next(3, 5);
                     patrolPoints.Add(GenerateRandomPatrol(
                         patrolPoints[i-1].Coordinate.X,
                         patrolPoints[i-1].Coordinate.Y,
@@ -109,12 +111,20 @@ namespace AquaMan.WebsocketAdapter
                 }
                 else
                 {
-                    patrolPoints.Add(GenerateRandomPatrol(
-                        respawnPoint.X,
-                        respawnPoint.Y,
-                        0,
-                        speed,
-                        duration
+                    int x = _random.Next(100, width - 100);
+                    int y = _random.Next(100, height - 100);
+
+                    int distance = getDistance(
+                        respawnPoint.X, 
+                        respawnPoint.Y, 
+                        x,
+                        y
+                        );
+
+                    //int duration = 
+                    patrolPoints.Add(new PatrolPoint(
+                        timestamp: distance/ speed,
+                        coordinate: new Point(x, y)
                         ));
                 }
             }
@@ -133,7 +143,7 @@ namespace AquaMan.WebsocketAdapter
             int dx = (int)(Math.Cos(randomAngle) * distance);
             int dy = (int)(Math.Sin(randomAngle) * distance);
 
-            Console.WriteLine($@"{x}, {y}, distance: {distance}, angle: {randomAngle} => {dx}, {dy}, speed: {speed},previous: {previousTimestamp}, timestamp: {timestamp}");
+            //Console.WriteLine($@"{x}, {y}, distance: {distance}, angle: {randomAngle} => {dx}, {dy}, speed: {speed},previous: {previousTimestamp}, timestamp: {timestamp}");
 
             return new PatrolPoint(
                    timestamp: timestamp,

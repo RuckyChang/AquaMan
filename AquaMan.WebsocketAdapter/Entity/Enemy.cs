@@ -7,7 +7,7 @@ namespace AquaMan.WebsocketAdapter.Entity
         public List<PatrolPoint> PatrolPoints;
         public Point RespawnPoint;
 
-        public bool Active { get; private set; }
+        public bool Active { get; private set; } = true;
         public long ReapwnAt;
 
         public Enemy(Point respawnPoint, List<PatrolPoint> patrolPoints)

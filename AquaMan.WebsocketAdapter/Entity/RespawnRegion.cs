@@ -29,8 +29,10 @@ namespace AquaMan.WebsocketAdapter.Entity
 
         public Point GetRandomPoint()
         {
-            int x = _random.Next(TopLeft.X, DownRight.X);
-            int y = _random.Next(TopLeft.Y, DownRight.Y);
+            int x = TopLeft.X < DownRight.X ? _random.Next(TopLeft.X, DownRight.X) :
+                _random.Next(DownRight.X, TopLeft.X);
+            int y = TopLeft.Y < DownRight.Y ? _random.Next(TopLeft.Y, DownRight.Y) :
+                _random.Next(DownRight.Y, TopLeft.Y);
 
             return new Point(x,y);
         }
@@ -41,8 +43,8 @@ namespace AquaMan.WebsocketAdapter.Entity
         private readonly Random _random = new Random();
 
         public List<Region> Regions { get; private set; } = new List<Region>();
-        private int thickness = 100;
-        private int padding = 100;
+        private int thickness = 300;
+        private int padding = 300;
 
 
         public RespawnRegion(
@@ -76,15 +78,10 @@ namespace AquaMan.WebsocketAdapter.Entity
         {
             int index = _random.Next(0, 3);
             return Regions[index].GetRandomPoint();
-
-            return Regions[1].GetRandomPoint();
         }
 
         public Point GetRanomRespawnPoint(int index)
         {
-            //int index = _random.Next(0, 3);
-            //return Regions[index].GetRandomPoint();
-
             return Regions[index].GetRandomPoint();
         }
     }
