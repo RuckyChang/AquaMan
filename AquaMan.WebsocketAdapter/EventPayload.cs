@@ -1,5 +1,6 @@
 ﻿using AquaMan.Domain.Entity;
 using AquaMan.WebsocketAdapter.Entity;
+using System.Collections.Generic;
 
 namespace AquaMan.WebsocketAdapter
 {
@@ -9,9 +10,12 @@ namespace AquaMan.WebsocketAdapter
         LoggedIn,
         LoggedOut,
         JoinedGame,
-        QuitGame,
+        PlayerQuitGame,
         Shot,
-        TargetKilled
+        TargetKilled,
+        RotationChanged,
+        GotRecentWorldState,
+        PlayerJoinedGame
     }
 
     public class EventPayload
@@ -36,13 +40,15 @@ namespace AquaMan.WebsocketAdapter
         #region game
         public class JoinedGame
         {
+            public string ID { get; set; }
             public string RoomId { get; set; }
             public string Name { get; set; }
             public int Slot { get; set; }
         }
 
-        public class QuitGame
+        public class PlayerQuitGame
         {
+            public string ID { get; set; }
             public string Name { get; set; }
             public int Slot { get; set; }
         }
@@ -58,6 +64,24 @@ namespace AquaMan.WebsocketAdapter
             public string KilledBy { get; set; }
             public int Slot { get; set; }
             public Cost cost { get; set; }
+        }
+
+        public class RotationChanged
+        {
+            public string PlayerId { get; set; }
+            public double Rotation { get; set; }
+        }
+
+        public class GotRecentWorldState: AuthorizedPayload
+        {
+            public List<PlayerInfo> PlayersInfo { get; set; }
+            public long Timestamp { get; set; }
+
+        }
+
+        public class PlayerJoinedGame
+        {
+            public PlayerInfo PlayerInfo { get; set; }
         }
         #endregion
     }

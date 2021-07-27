@@ -51,7 +51,7 @@ namespace AquaMan.DomainApi
             if (player == null)
             {
                 player = new Player(
-                      id: new Guid().ToString(),
+                      id: Guid.NewGuid().ToString(),
                       accountId: accountId
                 );
             }

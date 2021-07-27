@@ -339,7 +339,7 @@ namespace AquaMan.WebsocketAdapter.Test
 
             var token = string.Empty;
 
-            Event<QuitGame> quitGameEvent = null;
+            Event<PlayerQuitGame> quitGameEvent = null;
 
             using(var client = new WebsocketClient(url))
             {
@@ -360,9 +360,9 @@ namespace AquaMan.WebsocketAdapter.Test
                     {
                         var joinedGameEvent = JsonConvert.DeserializeObject<Event<JoinedGame>>(msg.Text);
                         JoinGameEvent.Set();
-                    }else if(eventType == (int)EventType.QuitGame)
+                    }else if(eventType == (int)EventType.PlayerQuitGame)
                     {
-                        quitGameEvent = JsonConvert.DeserializeObject<Event<QuitGame>>(msg.Text);
+                        quitGameEvent = JsonConvert.DeserializeObject<Event<PlayerQuitGame>>(msg.Text);
                         QuitGameEvent.Set();
                     }
                     else if (eventType == (int)EventType.Error)
@@ -435,7 +435,7 @@ namespace AquaMan.WebsocketAdapter.Test
 
             var token = string.Empty;
 
-            Event<QuitGame> quitGameEvent = null;
+            Event<PlayerQuitGame> quitGameEvent = null;
             // client 1 join game
             using(var client = new WebsocketClient(url))
             using(var client2= new WebsocketClient(url))
@@ -458,9 +458,9 @@ namespace AquaMan.WebsocketAdapter.Test
                         var joinedGameEvent = JsonConvert.DeserializeObject<Event<JoinedGame>>(msg.Text);
                         JoinGameEvent.Set();
                     }
-                    else if (eventType == (int)EventType.QuitGame)
+                    else if (eventType == (int)EventType.PlayerQuitGame)
                     {
-                        var tmp = JsonConvert.DeserializeObject<Event<QuitGame>>(msg.Text);
+                        var tmp = JsonConvert.DeserializeObject<Event<PlayerQuitGame>>(msg.Text);
                         if(tmp.Payload.Name == name2)
                         {
                             quitGameEvent = tmp;
@@ -525,7 +525,7 @@ namespace AquaMan.WebsocketAdapter.Test
                         var joinedGameEvent = JsonConvert.DeserializeObject<Event<JoinedGame>>(msg.Text);
                         JoinGameEvent.Set();
                     }
-                    else if (eventType == (int)EventType.QuitGame)
+                    else if (eventType == (int)EventType.PlayerQuitGame)
                     {
                         
                     }

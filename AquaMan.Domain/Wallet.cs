@@ -5,7 +5,7 @@ namespace AquaMan.Domain
     public class Wallet
     {
         public Currency Currency { get; }
-        public ulong Amount { get; private set; }
+        public uint Amount { get; private set; }
         public uint Precise { get; }
 
         public Wallet(Currency currency, uint amount, uint precise)

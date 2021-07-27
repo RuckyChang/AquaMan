@@ -10,7 +10,9 @@ namespace AquaMan.WebsocketAdapter
         JoinGame,
         QuitGame,
         Shoot,
-        HitTarget
+        HitTarget,
+        RotationChange,
+        GetRecentWorldState
     }
     
     public class CommandPayload
@@ -42,6 +44,16 @@ namespace AquaMan.WebsocketAdapter
         {
             public string HitBy { get; set; }
             public string Target { get; set; }
+        }
+
+        public class RotationChange: AuthorizedPayload
+        {
+            public double Rotation { get; set; }
+        }
+
+        public class GetRecentWorldState: AuthorizedPayload
+        {
+
         }
         #endregion
     }

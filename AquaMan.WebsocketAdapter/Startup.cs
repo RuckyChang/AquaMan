@@ -49,7 +49,15 @@ namespace AquaMan.WebsocketAdapter
                 };
                 socket.OnClose = () => {
                     Console.WriteLine("Close!");
+                    try
+                    {
                     _gameRoom.OnCloseConnection(socket);
+
+                    }
+                    catch (QuitGameFailedException e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
                 };
                 socket.OnMessage = message =>
                 {
@@ -86,6 +94,12 @@ namespace AquaMan.WebsocketAdapter
                         break;
                     case CommandType.HitTarget:
                         _gameRoom.Hit(socket, message);
+                        break;
+                    case CommandType.RotationChange:
+                        _gameRoom.RotationChange(socket, message);
+                        break;
+                    case CommandType.GetRecentWorldState:
+                        _gameRoom.GetRecentWorldState(socket, message);
                         break;
                     default:
                         throw new NoSuchCommandException(command.CommandType);

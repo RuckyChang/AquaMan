@@ -8,7 +8,9 @@ using Fleck;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using static AquaMan.WebsocketAdapter.CommandPayload;
+using static AquaMan.WebsocketAdapter.EventPayload;
 
 namespace AquaMan.WebsocketAdapter
 {
@@ -21,6 +23,8 @@ namespace AquaMan.WebsocketAdapter
         private AccountService _accountService;
         private PlayerService _playerService;
         private BulletOrderService _bulletOrderService;
+
+        private Boolean[] Slots = { false, false, false, false };
 
         private ConcurrentDictionary<Guid, ConnectedClient> connectedClients = new ConcurrentDictionary<Guid, ConnectedClient>();
 
@@ -42,34 +46,38 @@ namespace AquaMan.WebsocketAdapter
         public void JoinGame(IWebSocketConnection socket, string message)
         {
             var command = JsonConvert.DeserializeObject<Command<JoinGame>>(message);
-            
+
             var account = _accountService.OfToken(command.Payload.Token);
 
-            if(account == null)
+            if (account == null)
             {
                 throw new NoSuchTokenException(command.Payload.Token);
             }
 
+        
             // create player
             var player = _playerService.OfAccountId(
                 accountId: account.ID
                 );
 
-            player.OnJoinGame(ID);
+            
             _playerService.Save(player);
             ConnectedClient connectedClient;
             lock (_roomLock)
             {
-                if(connectedClients.Count >= 4)
+
+                int slot = ReserveEmptySlot();
+                if (slot < 0)
                 {
                     throw new RoomIsFullException($@"Room is full, id: {ID}");
                 }
+                
 
                 connectedClient = new ConnectedClient(
                         socket: socket,
                         account: account,
                         player: player,
-                        slot: connectedClients.Count
+                        slot: slot // not correct
                         );
 
                 if (!connectedClients.TryAdd(
@@ -79,14 +87,62 @@ namespace AquaMan.WebsocketAdapter
                 ){
                     throw new JoinGameFailedException($@"Join game failed: {socket.ConnectionInfo.Id}, Id: {ID}");
                 }
+
+                player.OnJoinGame(ID);
             }
 
-            Broadcast(EventType.JoinedGame, new EventPayload.JoinedGame()
+            var toPlayerItSelftmessage = JsonConvert.SerializeObject(new Event<EventPayload.JoinedGame>
             {
-                Name = account.Name,
-                Slot = connectedClient.Slot,
-                RoomId = command.Payload.RoomId
+                EventType = (int)EventType.JoinedGame,
+                Payload = new EventPayload.JoinedGame()
+                {
+                    ID = player.ID,
+                    Name = account.Name,
+                    Slot = connectedClient.Slot,
+                    RoomId = command.Payload.RoomId
+                }
             });
+
+            connectedClient.Socket.Send(toPlayerItSelftmessage);
+
+            var boradCastMessage = JsonConvert.SerializeObject(new Event<EventPayload.PlayerJoinedGame>()
+            {
+                EventType = (int)EventType.PlayerJoinedGame,
+                Payload = new EventPayload.PlayerJoinedGame()
+                {
+                  PlayerInfo = new PlayerInfo()
+                  {
+                      ID = connectedClient.Player.ID,
+                      Name = connectedClient.Account.Name,
+                      Slot = connectedClient.Slot,
+                      Money = new Money(
+                        connectedClient.Account.Wallet.Currency,
+                        connectedClient.Account.Wallet.Amount,
+                        connectedClient.Account.Wallet.Precise
+                        ),
+                      Body = new Body()
+                      {
+                          Rotation = connectedClient.Rotation
+                      }
+                  }
+                }
+            });
+
+            Broadcast(connectedClient.Socket.ConnectionInfo.Id, boradCastMessage);
+        }
+
+        private int ReserveEmptySlot()
+        {
+            for(int i =0; i< Slots.Length; i++)
+            {
+                if (!Slots[i])
+                {
+                    Slots[i] = true;
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         public void OnCloseConnection(IWebSocketConnection socket)
@@ -97,19 +153,22 @@ namespace AquaMan.WebsocketAdapter
 
                 if (!connectedClients.TryRemove(socket.ConnectionInfo.Id, out connectedClient))
                 {
-                    throw new JoinGameFailedException($@"Join game failed: {socket.ConnectionInfo.Id}, Id: {ID}");
+                    throw new QuitGameFailedException(@$"could not find the player with connection id: {socket.ConnectionInfo.Id}");
                 }
+
+                this.Slots[connectedClient.Slot] = false;
             }
 
             var player = _playerService.OfAccountId(connectedClient.Account.ID);
 
             player.OnQuitGame();
 
-            var event2Send = new Event<EventPayload.QuitGame>()
+            var event2Send = new Event<EventPayload.PlayerQuitGame>()
             {
-                EventType = (int)EventType.QuitGame,
-                Payload = new EventPayload.QuitGame()
+                EventType = (int)EventType.PlayerQuitGame,
+                Payload = new EventPayload.PlayerQuitGame()
                 {
+                    ID = connectedClient.Player.ID,
                     Name = connectedClient.Account.Name,
                     Slot = connectedClient.Slot
                 }
@@ -117,9 +176,7 @@ namespace AquaMan.WebsocketAdapter
 
             var message2Send = JsonConvert.SerializeObject(event2Send);
 
-            connectedClient.Socket.Send(message2Send);
-
-            Broadcast(message2Send);
+            Broadcast(connectedClient.Socket.ConnectionInfo.Id, message2Send);
         }
 
         public void QuitGame(IWebSocketConnection socket, string message)
@@ -134,17 +191,19 @@ namespace AquaMan.WebsocketAdapter
                 {
                     throw new JoinGameFailedException($@"Join game failed: {socket.ConnectionInfo.Id}, Id: {ID}");
                 }
+                this.Slots[connectedClient.Slot] = false;
             }
 
             var player = _playerService.OfAccountId(connectedClient.Account.ID);
 
             player.OnQuitGame();
 
-            var event2Send = new Event<EventPayload.QuitGame>()
+            var event2Send = new Event<EventPayload.PlayerQuitGame>()
             {
-                EventType = (int)EventType.QuitGame,
-                Payload = new EventPayload.QuitGame()
+                EventType = (int)EventType.PlayerQuitGame,
+                Payload = new EventPayload.PlayerQuitGame()
                 {
+                    ID = connectedClient.Player.ID,
                     Name = connectedClient.Account.Name,
                     Slot = connectedClient.Slot
                 }
@@ -154,7 +213,7 @@ namespace AquaMan.WebsocketAdapter
 
             connectedClient.Socket.Send(message2Send);
 
-            Broadcast(message2Send);
+            Broadcast(connectedClient.Socket.ConnectionInfo.Id, message2Send);
         }
 
         public void Shoot(IWebSocketConnection socket, string message)
@@ -187,7 +246,7 @@ namespace AquaMan.WebsocketAdapter
                 EventType = (int)EventType.Shot,
                 Payload = new EventPayload.Shot()
                 {
-                    Shooter = connectedClient.Account.Name,
+                    Shooter = connectedClient.Player.ID,
                     Slot = connectedClient.Slot,
                     ShotBullet = new ShotBullet()
                     {
@@ -198,12 +257,82 @@ namespace AquaMan.WebsocketAdapter
                 }
             };
 
-            Broadcast(JsonConvert.SerializeObject(shotEvent));
+            Broadcast(connectedClient.Socket.ConnectionInfo.Id, JsonConvert.SerializeObject(shotEvent));
         }
 
         public void Hit(IWebSocketConnection socket, string message)
         {
             // TODO: finish this.
+        }
+
+        public void RotationChange(IWebSocketConnection socket, string message)
+        {
+            var command = JsonConvert.DeserializeObject<Command<RotationChange>>(message);
+
+            ConnectedClient connectedClient;
+            if(!connectedClients.TryGetValue(socket.ConnectionInfo.Id, out connectedClient))
+            {
+                throw new ConnectionNotFoundException(socket.ConnectionInfo.Id);
+            }
+
+            connectedClient.RotationChange(command.Payload.Rotation);
+
+            var rotationChanged = new Event<EventPayload.RotationChanged>()
+            {
+                EventType = (int)EventType.RotationChanged,
+                Payload = new EventPayload.RotationChanged()
+                {
+                    PlayerId = connectedClient.Player.ID,
+                    Rotation = command.Payload.Rotation
+
+                }
+            };
+
+            Broadcast(connectedClient.Socket.ConnectionInfo.Id, JsonConvert.SerializeObject(rotationChanged));
+        }
+
+        public void GetRecentWorldState(IWebSocketConnection socket, string message)
+        {
+            ConnectedClient connectedClient;
+            if (!connectedClients.TryGetValue(socket.ConnectionInfo.Id, out connectedClient))
+            {
+                throw new ConnectionNotFoundException(socket.ConnectionInfo.Id);
+            }
+
+            List<PlayerInfo> players = new List<PlayerInfo>();
+
+            foreach(var client in connectedClients.Values)
+            {
+                players.Add(new PlayerInfo()
+                {
+                    ID = client.Player.ID,
+                    Name = client.Account.Name,
+                    Slot = client.Slot,
+                    Money = new Money(
+                        client.Account.Wallet.Currency,
+                        client.Account.Wallet.Amount,
+                        client.Account.Wallet.Precise
+                        ),
+                    Body = new Body()
+                    {
+                        Rotation = client.Rotation
+                    }
+                });
+            }
+
+            var gotRecentWorldState = new Event<EventPayload.GotRecentWorldState>()
+            {
+                EventType = (int)EventType.GotRecentWorldState,
+                Payload = new GotRecentWorldState()
+                {
+                    PlayersInfo = players,
+                    Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                }
+            };
+
+            connectedClient.Socket.Send(JsonConvert.SerializeObject(gotRecentWorldState));
+
+
         }
 
         // TODO: add bulletRepository.
@@ -215,22 +344,25 @@ namespace AquaMan.WebsocketAdapter
                 precise: 100
             );
         }
-
-        private void Broadcast<TPayload>(EventType eventType, TPayload payload)
+       
+        private void Broadcast<TPayload>(Guid id, EventType eventType, TPayload payload)
         {
             var event2Send = new Event<TPayload>()
             {
                 EventType = (int)eventType,
                 Payload = payload
             };
-            Broadcast(JsonConvert.SerializeObject(event2Send));
+            Broadcast(id, JsonConvert.SerializeObject(event2Send));
         }
 
-        private void Broadcast(string message)
+        private void Broadcast(Guid id, string message)
         {
             foreach (var connectedClient in connectedClients.Values)
             {
+                if (connectedClient.Socket.ConnectionInfo.Id != id)
+                {
                 connectedClient.Socket.Send(message);
+                }
             }
         }
 
@@ -242,6 +374,7 @@ namespace AquaMan.WebsocketAdapter
             public Account Account { get; }
             public int Slot { get;  }
             private ShootThrottle _shootThrottle;
+            public double Rotation { get; private set; } = 0;
 
             public ConnectedClient(
                 IWebSocketConnection socket, 
@@ -275,6 +408,10 @@ namespace AquaMan.WebsocketAdapter
                     )
                 );
             }
+            public void RotationChange(double value)
+            {
+                Rotation = value;
+            }
         }
 
         class ShootThrottle
@@ -282,7 +419,7 @@ namespace AquaMan.WebsocketAdapter
             private object _shootLock = new object();
 
             private static TimeSpan Interval = TimeSpan.FromSeconds(1);
-            private int Rate = 20;
+            private int Rate = 100;
             private DateTime timestamp = DateTime.UtcNow;
             private int Counter { get; set; } = 0;
             private ConnectedClient _client { get; }
@@ -295,7 +432,7 @@ namespace AquaMan.WebsocketAdapter
             {
                 lock (_shootLock)
                 {
-                    if(timestamp + Interval >= DateTime.UtcNow)
+                    if(timestamp + Interval < DateTime.UtcNow)
                     {
                         return new ShootThrottle(_client);
                     }
@@ -311,5 +448,7 @@ namespace AquaMan.WebsocketAdapter
                 }
             }
         }
+
+    
     }
 }

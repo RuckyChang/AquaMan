@@ -13,6 +13,7 @@ namespace AquaMan.Domain
         public string Token { get; private set; } = "";
         public DateTime? LastLoginTime { get; private set; }
         public Wallet Wallet { get; }
+        
         public Account(
             string id,
             string name,
