@@ -93,6 +93,13 @@ namespace AquaMan.WebsocketAdapter
         {
             public List<Entity.EnemyInGame> Enemies { get; set; }
         }
+
+        public class DroppedCoin
+        {
+            public Currency Currency { get; set; }
+            public uint Amount { get; set; }
+            public uint Precise { get; set; }
+        }
         #endregion
     }
 }

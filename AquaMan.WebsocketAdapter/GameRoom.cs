@@ -341,8 +341,20 @@ namespace AquaMan.WebsocketAdapter
                 };
                 Broadcast("", JsonConvert.SerializeObject(killEvent));
 
-                // TODO: broadcast dropcoint event.
-                //var 
+
+                var droppedCoinEvent = new Event<EventPayload.DroppedCoin>()
+                {
+                    EventType = (int)EventType.DroppedCoin,
+                    Payload = new DroppedCoin()
+                    {
+                        Currency = enemy.RewardMoney[0].Currency,
+                        Amount = enemy.RewardMoney[0].Amount,
+                        Precise = enemy.RewardMoney[0].Precise
+
+                    }
+                };
+
+                connectedClient.Socket.Send(JsonConvert.SerializeObject(droppedCoinEvent));
             }
         }
 
