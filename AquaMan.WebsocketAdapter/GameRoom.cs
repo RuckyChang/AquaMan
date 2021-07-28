@@ -28,7 +28,7 @@ namespace AquaMan.WebsocketAdapter
         private bool[] Slots = { false, false, false, false };
 
         private ConcurrentDictionary<Guid, ConnectedClient> connectedClients = new ConcurrentDictionary<Guid, ConnectedClient>();
-        private EnemyFactory enemyFactory;
+        private SmallEnemyFactory enemyFactory;
 
 
         public GameRoom(
@@ -44,7 +44,7 @@ namespace AquaMan.WebsocketAdapter
             _accountService = accountService;
             _playerService = playerService;
             _bulletOrderService = bulletOrderService;
-            enemyFactory = new EnemyFactory();
+            enemyFactory = new SmallEnemyFactory();
             initRespawningEnemies();
         }
 
@@ -296,7 +296,54 @@ namespace AquaMan.WebsocketAdapter
 
         public void Hit(IWebSocketConnection socket, string message)
         {
-            // TODO: finish this.
+            var command = JsonConvert.DeserializeObject<Command<CommandPayload.HitTarget>>(message);
+
+            ConnectedClient connectedClient;
+            if (!connectedClients.TryGetValue(socket.ConnectionInfo.Id, out connectedClient))
+            {
+                throw new ConnectionNotFoundException(socket.ConnectionInfo.Id);
+            }
+
+            var hitEnemy = enemyFactory.FindEnemy(command.Payload.InGameId);
+
+            //TODO: this may cause race condition, try to add lock or wirte another actor to handle this.
+            var bulletOrder = _bulletOrderService.ofAccountId(connectedClient.Account.ID, BulletOrderStateType.FIRED, 1)[0];
+            bulletOrder.OnHit(new Domain.HitTarget(hitEnemy.ID));
+            _bulletOrderService.Save(bulletOrder);
+
+            //TODO: find it in the group
+            var enemy = new Domain.Entity.Enemy(Guid.NewGuid().ToString());
+
+            var cost = new Cost(currency: 0, amount: 100, precise: 100);
+            var bullet = new Domain.Entity.Bullet("0", cost);
+
+            (bool isKilled, DropCoinEvent dropCoinEvent) = connectedClient.Hit(enemy, bullet);
+
+
+
+            if (isKilled)
+            {
+                connectedClient.Account.OnCoinDrop(dropCoinEvent);
+
+                _accountService.Save(connectedClient.Account);
+
+                // broadcast kill event
+                var killEvent = new Event<EventPayload.TargetKilled>()
+                {
+                    EventType = (int)EventType.TargetKilled,
+                    Payload = new TargetKilled()
+                    {
+                        KilledByName = connectedClient.Account.Name,
+                        KilledBy = connectedClient.Account.ID,
+                        Slot = connectedClient.Slot,
+                        KilledEnemyInGameId = hitEnemy.InGameId
+                    }
+                };
+                Broadcast("", JsonConvert.SerializeObject(killEvent));
+
+                // TODO: broadcast dropcoint event.
+                //var 
+            }
         }
 
         public void RotationChange(IWebSocketConnection socket, string message)
@@ -379,8 +426,6 @@ namespace AquaMan.WebsocketAdapter
             );
         }
        
-        
-
         private void Broadcast<TPayload>(Guid id, EventType eventType, TPayload payload)
         {
             var event2Send = new Event<TPayload>()
@@ -443,7 +488,7 @@ namespace AquaMan.WebsocketAdapter
                     bulletName: "0",
                     cost: new Cost(
                         currency: Account.Wallet.Currency,
-                        amount: 1,
+                        amount: 100,
                         precise: Account.Wallet.Precise
                         )
                     )
@@ -452,6 +497,15 @@ namespace AquaMan.WebsocketAdapter
             public void RotationChange(double value)
             {
                 Rotation = value;
+            }
+
+            public (bool, DropCoinEvent) Hit(Domain.Entity.Enemy enemy, Bullet bullet)
+            {
+                return Player.OnHitEvent(new HitEvent(
+                    hitBy: new HitBy(Player),
+                    enemy: enemy,
+                    bullet: bullet
+                ), 50);
             }
         }
 

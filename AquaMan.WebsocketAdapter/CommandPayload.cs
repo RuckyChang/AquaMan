@@ -43,7 +43,7 @@ namespace AquaMan.WebsocketAdapter
         public class HitTarget : AuthorizedPayload
         {
             public string HitBy { get; set; }
-            public string Target { get; set; }
+            public string InGameId { get; set; }
         }
 
         public class RotationChange: AuthorizedPayload

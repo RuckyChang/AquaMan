@@ -70,6 +70,11 @@ namespace AquaMan.DomainApi
             return bulletOrder;
         }
 
+        public List<BulletOrder> ofAccountId(string accountId, BulletOrderStateType state, int count)
+        {
+            return _repo.OfAccountId(accountId, state, count);
+        }
+
         public void Save(BulletOrder order)
         {
             _repo.Save(order);

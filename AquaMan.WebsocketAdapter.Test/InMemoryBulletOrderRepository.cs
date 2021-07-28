@@ -21,6 +21,38 @@ namespace AquaMan.WebsocketAdapter.Test
             return found;
         }
 
+        public List<BulletOrder> OfAccountId(string accountId, BulletOrderStateType state)
+        {
+            List<BulletOrder> found = new List<BulletOrder>();
+            foreach(var bulletOrder in _storage.Values)
+            {
+                if(bulletOrder.AccountID == accountId && bulletOrder.CurrentState.StateType == state)
+                {
+                    found.Add(bulletOrder);
+                }
+            }
+
+            return found;
+        }
+
+        public List<BulletOrder> OfAccountId(string accountId, BulletOrderStateType state, int count)
+        {
+            List<BulletOrder> found = new List<BulletOrder>();
+            foreach (var bulletOrder in _storage.Values)
+            {
+                if (bulletOrder.AccountID == accountId && bulletOrder.CurrentState.StateType == state)
+                {
+                    found.Add(bulletOrder);
+                }
+                if(found.Count == count)
+                {
+                    break;
+                }
+            }
+
+            return found;
+        }
+
         public BulletOrder OfId(string ID)
         {
             return _storage[ID];

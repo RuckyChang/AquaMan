@@ -22,9 +22,10 @@ namespace AquaMan.Domain.Entity
         public string ID { get; }
         public List<RewardMoney> RewardMoney { get; } = new List<RewardMoney>();
 
-        public Enemy()
+        public Enemy(string id)
         {
-            ID = Guid.NewGuid().ToString();
+            // TODO: extract this out.
+            ID = id;
             RewardMoney.Add(new RewardMoney(
                 currency: Currency.USD,
                 amount: 100,

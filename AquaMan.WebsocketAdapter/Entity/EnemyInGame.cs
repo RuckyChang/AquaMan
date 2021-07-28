@@ -2,16 +2,22 @@
 
 namespace AquaMan.WebsocketAdapter.Entity
 {
-    public class Enemy
+    public class EnemyInGame
     {
         public List<PatrolPoint> PatrolPoints;
         public Point RespawnPoint;
 
+
         public bool Active { get; private set; } = true;
         public long ReapwnAt;
 
-        public Enemy(Point respawnPoint, List<PatrolPoint> patrolPoints)
+        public string ID { get; }
+        public string InGameId { get; }
+
+        public EnemyInGame(string id, string inGameId, Point respawnPoint, List<PatrolPoint> patrolPoints)
         {
+            ID = id;
+            InGameId = inGameId;
             RespawnPoint = respawnPoint;
             PatrolPoints = patrolPoints;
         }
@@ -26,6 +32,11 @@ namespace AquaMan.WebsocketAdapter.Entity
         {
             RespawnPoint = respawnPoint;
             PatrolPoints = patrolPoints;
+        }
+
+        public void Killed()
+        {
+            Active = false;
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace AquaMan.WebsocketAdapter
 {
-    class EnemyFactory
+    class SmallEnemyFactory
     {
 
         private int width = 1680;
@@ -12,13 +12,13 @@ namespace AquaMan.WebsocketAdapter
 
         private readonly Random _random = new Random();
 
-        public List<Enemy> EnemyPool { get; private set; } = new List<Enemy>();
+        public List<EnemyInGame> pool { get; private set; } = new List<EnemyInGame>();
         public int EnemyCount
         {
             get
             {
                 int count = 0;
-                foreach(var enemy in EnemyPool)
+                foreach(var enemy in pool)
                 {
                     if (enemy.Active)
                     {
@@ -30,15 +30,17 @@ namespace AquaMan.WebsocketAdapter
             }
         }
 
+        private readonly string _enemyId = "0";
+
         private RespawnRegion _respawnRegion = new RespawnRegion(1680, 1024);
-        public EnemyFactory()
+        public SmallEnemyFactory()
         {
 
         }
 
-        public List<Enemy> RespawnEnemies(int count)
+        public List<EnemyInGame> RespawnEnemies(int count)
         {
-            List<Enemy> enemies = new List<Enemy>();
+            List<EnemyInGame> enemies = new List<EnemyInGame>();
 
             for(int i = 0; i< count; i++)
             {
@@ -48,9 +50,9 @@ namespace AquaMan.WebsocketAdapter
             return enemies;
         }
 
-        public Enemy RespawnEnemy()
+        public EnemyInGame RespawnEnemy()
         {
-            Enemy enemy = GetFromPool();
+            EnemyInGame enemy = GetFromPool();
 
             if(enemy != null)
             {
@@ -65,19 +67,21 @@ namespace AquaMan.WebsocketAdapter
             {
                 var point = _respawnRegion.GetRanomRespawnPoint();
                 // create one.
-                enemy = new Enemy(
+                enemy = new EnemyInGame(
+                    _enemyId,
+                    Guid.NewGuid().ToString(),
                     point,
                     patrolPoints: GenerateRandomPatrols(point, 3)
                     );
 
-                EnemyPool.Add(enemy);
+                pool.Add(enemy);
             }
             return enemy;
         }
 
-        private Enemy GetFromPool()
+        private EnemyInGame GetFromPool()
         {
-            foreach(var enemy in EnemyPool)
+            foreach(var enemy in pool)
             {
                 if (!enemy.Active)
                 {
@@ -191,6 +195,19 @@ namespace AquaMan.WebsocketAdapter
             int dx = x1 - x2;
             int dy = y1 - y2;
             return (int)Math.Sqrt(dx * dx + dy * dy);
+        }
+
+        public EnemyInGame FindEnemy(string inGameID)
+        {
+            foreach(var enemy in pool)
+            {
+                if(enemy.InGameId == inGameID)
+                {
+                    return enemy;
+                }
+            }
+
+            return null;
         }
     }
 }

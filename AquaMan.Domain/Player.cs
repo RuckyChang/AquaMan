@@ -59,7 +59,7 @@ namespace AquaMan.Domain
 
             var rand = new Random();
 
-            var randResult = rand.Next(100) + 1;
+            var randResult = rand.Next(1, 100);
 
             if(randResult <= killPossibility)
             {

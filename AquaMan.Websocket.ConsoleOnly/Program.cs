@@ -24,7 +24,7 @@ namespace AquaMan.Websocket.ConsoleOnly
                 accountService: accountService,
                 playerService: playerService,
                 bulletOrderService: bulletOrderService
-                );
+                 );
 
             startup.Start();
 
